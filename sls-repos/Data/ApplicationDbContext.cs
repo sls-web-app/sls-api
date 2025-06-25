@@ -21,6 +21,9 @@ namespace sls_repos.Data
                 entity.Property(a => a.Username).IsRequired().HasMaxLength(50);
                 entity.Property(a => a.PasswordHash).IsRequired();
                 entity.Property(a => a.PasswordSalt).IsRequired();
+
+                //Make sure Username is unique
+                entity.HasIndex(a => a.Username).IsUnique();
             });
 
             modelBuilder.Entity<Team>(entity =>
@@ -59,6 +62,9 @@ namespace sls_repos.Data
                 entity.Property(u => u.Name).IsRequired().HasMaxLength(50);
                 entity.Property(u => u.Surname).IsRequired().HasMaxLength(50);
                 entity.Property(u => u.ClassName).HasMaxLength(50);
+
+                //Make sure Email is unique
+                entity.HasIndex(u => u.Email).IsUnique();
 
                 //One-to-many relationship with Team
                 entity.HasOne(u => u.Team)
