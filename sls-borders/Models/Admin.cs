@@ -1,5 +1,3 @@
-using sls_borders.Enums;
-
 namespace sls_borders.Models
 {
     public class Admin

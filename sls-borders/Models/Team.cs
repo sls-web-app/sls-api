@@ -9,5 +9,6 @@ namespace sls_borders.Models
 
         public ICollection<User> Users { get; set; } = new List<User>();
         public ICollection<Tournament> Tournaments { get; set; } = new List<Tournament>();
+        public ICollection<Tournament> OrganizedTournaments { get; set; } = new List<Tournament>();
     }
 }
