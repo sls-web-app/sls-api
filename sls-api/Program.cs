@@ -1,3 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+using sls_repos.Data;
+using sls_api.Configurations;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,6 +10,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+//Configure PostgreSQL connection
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("sls-repos"))
+);
+
+// Register repositories
+builder.Services.AddRepositories();
 
 var app = builder.Build();
 
