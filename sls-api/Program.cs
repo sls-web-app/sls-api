@@ -1,30 +1,32 @@
 using Microsoft.EntityFrameworkCore;
 using sls_repos.Data;
 using sls_api.Configurations;
-
+using Scalar.AspNetCore;
+using sls_borders.Mappings; 
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+// Services
 builder.Services.AddOpenApi();
 
-//Configure PostgreSQL connection
+builder.Services.AddControllers();
+builder.Services.AddOpenApi();
+
+builder.Services.AddAutoMapper(typeof(Program), typeof(AdminProfile));
+
+//PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("sls-repos"))
 );
 
-// Register repositories
 builder.Services.AddRepositories();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
