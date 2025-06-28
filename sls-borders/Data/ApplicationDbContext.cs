@@ -1,7 +1,7 @@
 using sls_borders.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace sls_repos.Data
+namespace sls_borders.Data
 {
     public class ApplicationDbContext : DbContext
     {

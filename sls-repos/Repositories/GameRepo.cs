@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using sls_borders.DTO.Game;
 using sls_borders.Models;
 using sls_borders.Repositories;
-using sls_repos.Data;
+using sls_borders.Data;
 
 namespace sls_repos.Repositories
 {

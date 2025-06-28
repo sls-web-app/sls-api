@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using sls_repos.Data;
+using sls_borders.Data;
 using sls_api.Configurations;
 using Scalar.AspNetCore;
 using sls_borders.Mappings; 

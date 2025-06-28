@@ -1,3 +1,4 @@
+using sls_borders.DTO.UserDto;
 using sls_borders.Enums;
 
 namespace sls_borders.Models

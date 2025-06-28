@@ -1,6 +1,6 @@
 using sls_borders.Models;
 using sls_borders.Repositories;
-using sls_repos.Data;
+using sls_borders.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace sls_repos.Repositories

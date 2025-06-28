@@ -1,3 +1,5 @@
+using sls_borders.DTO.TournamentDto;
+using sls_borders.DTO.UserDto;
 using sls_borders.Enums;
 using sls_borders.Models;
 
@@ -9,9 +11,9 @@ public class UpdateGameDto
     public GameScore? Score { get; set; }
 
     public Guid TournamentId { get; set; } = Guid.Empty;
-    public Tournament Tournament { get; set; } = null!;
+    public GetTournamentDto Tournament { get; set; } = null!;
     public Guid WhitePlayerId { get; set; } = Guid.Empty;
-    public User WhitePlayer { get; set; } = null!;
+    public GetUserDto WhitePlayer { get; set; } = null!;
     public Guid BlackPlayerId { get; set; } = Guid.Empty;
-    public User BlackPlayer { get; set; } = null!;
+    public GetUserDto BlackPlayer { get; set; } = null!;
 }

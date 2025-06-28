@@ -1,39 +1,48 @@
 using sls_borders.Models;
 using sls_borders.Repositories;
-using sls_repos.Data;
+using sls_borders.Data;
 using Microsoft.EntityFrameworkCore;
+using sls_borders.DTO.UserDto;
 
 namespace sls_repos.Repositories
 {
     public class UserRepo(ApplicationDbContext context) : IUserRepo
     {
-        public async Task<List<User>> GetAllAsync()
+        public async Task<List<GetUserDto>> GetAllAsync()
         {
-            return await context.Users.ToListAsync();
+            throw new NotImplementedException();
         }
 
-        public async Task<User?> GetByIdAsync(Guid id)
+        public async Task<GetUserDto?> GetByIdAsync(Guid id)
         {
-            return await context.Users.FindAsync(id);
+            throw new NotImplementedException();
         }
 
-        public async Task<User> CreateAsync(User user)
+        public Task<GetUserDto> CreateAsync(CreateUserDto getUserDto)
         {
-            context.Users.Add(user);
-            await context.SaveChangesAsync();
-            return user;
+            throw new NotImplementedException();
         }
 
-        public async Task<User?> UpdateAsync(Guid id, User newUserData)
+        public Task<GetUserDto?> UpdateAsync(Guid id, UpdateUserDto getUserDto)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<GetUserDto> CreateAsync(GetUserDto getUserDto)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<GetUserDto?> UpdateAsync(Guid id, GetUserDto newGetUserDtoData)
         {
             var existingUser = await context.Users.FindAsync(id);
             if (existingUser == null) return null;
 
-            context.Entry(existingUser).CurrentValues.SetValues(newUserData);
+            context.Entry(existingUser).CurrentValues.SetValues(newGetUserDtoData);
 
             context.Users.Update(existingUser);
             await context.SaveChangesAsync();
-            return existingUser;
+            throw new NotImplementedException();
         }
 
         public async Task<bool> DeleteAsync(Guid id)
@@ -51,9 +60,9 @@ namespace sls_repos.Repositories
             return await context.Users.AnyAsync(u => u.Email == email);
         }
 
-        public async Task<User?> GetByEmailAsync(string email)
+        public async Task<GetUserDto?> GetByEmailAsync(string email)
         {
-            return await context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            throw new NotImplementedException();
         }
 
     }
