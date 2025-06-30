@@ -9,10 +9,8 @@ using System.Text;
 
 namespace sls_repos.Repositories
 {
-    public class AdminRepo(ApplicationDbContext context, IMapper mapper) : IAdminRepo
+    public class AdminRepo(ApplicationDbContext _context, IMapper _mapper) : IAdminRepo
     {
-        private readonly ApplicationDbContext _context = context;
-        private readonly IMapper _mapper = mapper;
 
         public async Task<List<GetAdminDto>> GetAllAsync()
         {
