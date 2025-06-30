@@ -11,6 +11,5 @@ public class GetTeamDto
     public string Img { get; set; } = null!;
 
     public ICollection<GetUserDto> Users { get; set; } = new List<GetUserDto>();
-    public ICollection<GetTournamentDto> Tournaments { get; set; } = new List<GetTournamentDto>();
-    public ICollection<GetTournamentDto> OrganizedTournaments { get; set; } = new List<GetTournamentDto>();
+
 }

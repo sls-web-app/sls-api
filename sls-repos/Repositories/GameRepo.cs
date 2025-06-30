@@ -22,8 +22,6 @@ namespace sls_repos.Repositories
         {
             var games = await _context.Games
                 .Include(g => g.Tournament)
-                .Include(g => g.WhitePlayer)
-                .Include(g => g.BlackPlayer)
                 .ToListAsync();
                 
             return _mapper.Map<List<GetGameDto>>(games);
@@ -33,8 +31,6 @@ namespace sls_repos.Repositories
         {
             var game = await _context.Games
                 .Include(g => g.Tournament)
-                .Include(g => g.WhitePlayer)
-                .Include(g => g.BlackPlayer)
                 .FirstOrDefaultAsync(g => g.Id == id);
 
             return game != null ? _mapper.Map<GetGameDto>(game) : null;
@@ -62,8 +58,6 @@ namespace sls_repos.Repositories
             
             var createdGame = await _context.Games
                 .Include(g => g.Tournament)
-                .Include(g => g.WhitePlayer)
-                .Include(g => g.BlackPlayer)
                 .FirstAsync(g => g.Id == game.Id);
 
             return _mapper.Map<GetGameDto>(createdGame);
@@ -100,8 +94,6 @@ namespace sls_repos.Repositories
             
             var updatedGame = await _context.Games
                 .Include(g => g.Tournament)
-                .Include(g => g.WhitePlayer)
-                .Include(g => g.BlackPlayer)
                 .FirstAsync(g => g.Id == id);
 
             return _mapper.Map<GetGameDto>(updatedGame);

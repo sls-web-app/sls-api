@@ -1,69 +1,116 @@
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using sls_borders.Data;
+using sls_borders.DTO.UserDto;
 using sls_borders.Models;
 using sls_borders.Repositories;
-using sls_borders.Data;
-using Microsoft.EntityFrameworkCore;
-using sls_borders.DTO.UserDto;
 
 namespace sls_repos.Repositories
 {
-    public class UserRepo(ApplicationDbContext context) : IUserRepo
+    public class UserRepo : IUserRepo
     {
+        private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
+
+        public UserRepo(ApplicationDbContext context, IMapper mapper)
+        {
+            _context = context;
+            _mapper = mapper;
+        }
+
         public async Task<List<GetUserDto>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            var users = await _context.Users
+                .Include(u => u.Team)
+                .Include(u => u.GamesAsWhite)
+                .Include(u => u.GamesAsBlack)
+                .ToListAsync();
+
+            return _mapper.Map<List<GetUserDto>>(users);
         }
 
         public async Task<GetUserDto?> GetByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            var user = await _context.Users
+                .Include(u => u.Team)
+                .Include(u => u.GamesAsWhite)
+                .Include(u => u.GamesAsBlack)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            return user != null ? _mapper.Map<GetUserDto>(user) : null;
         }
 
-        public Task<GetUserDto> CreateAsync(CreateUserDto getUserDto)
+        public async Task<GetUserDto> CreateAsync(CreateUserDto createUserDto)
         {
-            throw new NotImplementedException();
+            var user = _mapper.Map<User>(createUserDto);
+
+            if (createUserDto.TeamId != Guid.Empty)
+            {
+                var team = await _context.Teams.FindAsync(createUserDto.TeamId);
+                if (team == null)
+                    return null;
+                user.Team = team;
+            }
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+            
+            
+
+            // Reload the user with related data
+            var createdUser = await _context.Users
+                .Include(u => u.Team)
+                .Include(u => u.GamesAsWhite)
+                .Include(u => u.GamesAsBlack)
+                .FirstAsync(u => u.Id == user.Id);
+
+            return _mapper.Map<GetUserDto>(createdUser);
         }
 
-        public Task<GetUserDto?> UpdateAsync(Guid id, UpdateUserDto getUserDto)
+        public async Task<GetUserDto?> UpdateAsync(Guid id, UpdateUserDto updateUserDto)
         {
-            throw new NotImplementedException();
-        }
+            var existingUser = await _context.Users
+                .Include(u => u.Team)
+                .Include(u => u.GamesAsWhite)
+                .Include(u => u.GamesAsBlack)
+                .FirstOrDefaultAsync(u => u.Id == id);
 
-        public async Task<GetUserDto> CreateAsync(GetUserDto getUserDto)
-        {
-            throw new NotImplementedException();
-        }
+            if (existingUser == null)
+                return null;
 
-        public async Task<GetUserDto?> UpdateAsync(Guid id, GetUserDto newGetUserDtoData)
-        {
-            var existingUser = await context.Users.FindAsync(id);
-            if (existingUser == null) return null;
+            _mapper.Map(updateUserDto, existingUser);
 
-            context.Entry(existingUser).CurrentValues.SetValues(newGetUserDtoData);
+            _context.Users.Update(existingUser);
+            await _context.SaveChangesAsync();
 
-            context.Users.Update(existingUser);
-            await context.SaveChangesAsync();
-            throw new NotImplementedException();
+            return _mapper.Map<GetUserDto>(existingUser);
         }
 
         public async Task<bool> DeleteAsync(Guid id)
         {
-            var user = await context.Users.FindAsync(id);
-            if (user == null) return false;
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+                return false;
 
-            context.Users.Remove(user);
-            await context.SaveChangesAsync();
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
             return true;
         }
 
         public async Task<bool> EmailExistsAsync(string email)
         {
-            return await context.Users.AnyAsync(u => u.Email == email);
+            return await _context.Users.AnyAsync(u => u.Email == email);
         }
 
         public async Task<GetUserDto?> GetByEmailAsync(string email)
         {
-            throw new NotImplementedException();
-        }
+            var user = await _context.Users
+                .Include(u => u.Team)
+                .Include(u => u.GamesAsWhite)
+                .Include(u => u.GamesAsBlack)
+                .FirstOrDefaultAsync(u => u.Email == email);
 
+            return user != null ? _mapper.Map<GetUserDto>(user) : null;
+        }
     }
 }

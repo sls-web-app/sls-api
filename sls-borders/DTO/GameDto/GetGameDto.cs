@@ -12,9 +12,6 @@ public class GetGameDto
     public GameScore? Score { get; set; }
 
     public Guid TournamentId { get; set; } = Guid.Empty;
-    public GetTournamentDto Tournament { get; set; } = null!;
     public Guid WhitePlayerId { get; set; } = Guid.Empty;
-    public GetUserDto WhitePlayer { get; set; } = null!;
     public Guid BlackPlayerId { get; set; } = Guid.Empty;
-    public GetUserDto BlackPlayer { get; set; } = null!;
 }
