@@ -1,45 +1,87 @@
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using sls_borders.Data;
+using sls_borders.DTO.UserDto;
 using sls_borders.Models;
 using sls_borders.Repositories;
-using sls_repos.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace sls_repos.Repositories
 {
-    public class UserRepo(ApplicationDbContext context) : IUserRepo
+    public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
     {
-        public async Task<List<User>> GetAllAsync()
+        public async Task<List<GetUserDto>> GetAllAsync()
         {
-            return await context.Users.ToListAsync();
+            var users = await context.Users
+                .Include(u => u.Team)
+                .Include(u => u.GamesAsWhite)
+                .Include(u => u.GamesAsBlack)
+                .ToListAsync();
+
+            return mapper.Map<List<GetUserDto>>(users);
         }
 
-        public async Task<User?> GetByIdAsync(Guid id)
+        public async Task<GetUserDto?> GetByIdAsync(Guid id)
         {
-            return await context.Users.FindAsync(id);
+            var user = await context.Users
+                .Include(u => u.Team)
+                .Include(u => u.GamesAsWhite)
+                .Include(u => u.GamesAsBlack)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            return user != null ? mapper.Map<GetUserDto>(user) : null;
         }
 
-        public async Task<User> CreateAsync(User user)
+        public async Task<GetUserDto> CreateAsync(CreateUserDto createUserDto)
         {
+            var user = mapper.Map<User>(createUserDto);
+
+            if (createUserDto.TeamId != Guid.Empty)
+            {
+                var team = await context.Teams.FindAsync(createUserDto.TeamId);
+                if (team == null)
+                    return null;
+                user.Team = team;
+            }
+
             context.Users.Add(user);
             await context.SaveChangesAsync();
-            return user;
+            
+            
+
+            // Reload the user with related data
+            var createdUser = await context.Users
+                .Include(u => u.Team)
+                .Include(u => u.GamesAsWhite)
+                .Include(u => u.GamesAsBlack)
+                .FirstAsync(u => u.Id == user.Id);
+
+            return mapper.Map<GetUserDto>(createdUser);
         }
 
-        public async Task<User?> UpdateAsync(Guid id, User newUserData)
+        public async Task<GetUserDto?> UpdateAsync(Guid id, UpdateUserDto updateUserDto)
         {
-            var existingUser = await context.Users.FindAsync(id);
-            if (existingUser == null) return null;
+            var existingUser = await context.Users
+                .Include(u => u.Team)
+                .Include(u => u.GamesAsWhite)
+                .Include(u => u.GamesAsBlack)
+                .FirstOrDefaultAsync(u => u.Id == id);
 
-            context.Entry(existingUser).CurrentValues.SetValues(newUserData);
+            if (existingUser == null)
+                return null;
+
+            mapper.Map(updateUserDto, existingUser);
 
             context.Users.Update(existingUser);
             await context.SaveChangesAsync();
-            return existingUser;
+
+            return mapper.Map<GetUserDto>(existingUser);
         }
 
         public async Task<bool> DeleteAsync(Guid id)
         {
             var user = await context.Users.FindAsync(id);
-            if (user == null) return false;
+            if (user == null)
+                return false;
 
             context.Users.Remove(user);
             await context.SaveChangesAsync();
@@ -51,10 +93,15 @@ namespace sls_repos.Repositories
             return await context.Users.AnyAsync(u => u.Email == email);
         }
 
-        public async Task<User?> GetByEmailAsync(string email)
+        public async Task<GetUserDto?> GetByEmailAsync(string email)
         {
-            return await context.Users.FirstOrDefaultAsync(u => u.Email == email);
-        }
+            var user = await context.Users
+                .Include(u => u.Team)
+                .Include(u => u.GamesAsWhite)
+                .Include(u => u.GamesAsBlack)
+                .FirstOrDefaultAsync(u => u.Email == email);
 
+            return user != null ? mapper.Map<GetUserDto>(user) : null;
+        }
     }
 }

@@ -1,3 +1,5 @@
+using sls_borders.DTO.UserDto;
+
 namespace sls_borders.Models
 {
     public class Team

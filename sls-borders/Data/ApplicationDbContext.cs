@@ -1,7 +1,7 @@
 using sls_borders.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace sls_repos.Data
+namespace sls_borders.Data
 {
     public class ApplicationDbContext : DbContext
     {
@@ -39,14 +39,11 @@ namespace sls_repos.Data
                     .HasForeignKey(u => u.TeamId)
                     .OnDelete(DeleteBehavior.SetNull);
 
-                
-                //One-to-many relationship with Tournaments (organized tournaments)
                 entity.HasMany(t => t.OrganizedTournaments)
                     .WithOne(t => t.OrganizingTeam)
                     .HasForeignKey(t => t.OrganizingTeamId)
                     .OnDelete(DeleteBehavior.SetNull);
 
-                //Many-to-many relationship with Tournaments (playing tournaments)
                 entity.HasMany(t => t.Tournaments)
                     .WithMany(t => t.Teams)
                     .UsingEntity(j => j.ToTable("TeamTournaments"));
@@ -62,27 +59,7 @@ namespace sls_repos.Data
                 entity.Property(u => u.Name).IsRequired().HasMaxLength(50);
                 entity.Property(u => u.Surname).IsRequired().HasMaxLength(50);
                 entity.Property(u => u.ClassName).HasMaxLength(50);
-
-                //Make sure Email is unique
                 entity.HasIndex(u => u.Email).IsUnique();
-
-                //One-to-many relationship with Team
-                entity.HasOne(u => u.Team)
-                    .WithMany(t => t.Users)
-                    .HasForeignKey(u => u.TeamId)
-                    .OnDelete(DeleteBehavior.SetNull);
-
-                //One-to-many relationship with Games (as White Player)
-                entity.HasMany(u => u.GamesAsWhite)
-                    .WithOne(g => g.WhitePlayer)
-                    .HasForeignKey(g => g.WhitePlayerId)
-                    .OnDelete(DeleteBehavior.SetNull);
-                
-                //One-to-many relationship with Games (as Black Player)
-                entity.HasMany(u => u.GamesAsBlack)
-                    .WithOne(g => g.BlackPlayer)
-                    .HasForeignKey(g => g.BlackPlayerId)
-                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             modelBuilder.Entity<Tournament>(entity =>
@@ -91,19 +68,7 @@ namespace sls_repos.Data
                 entity.Property(t => t.Date).IsRequired();
                 entity.Property(t => t.Round).IsRequired(false);
                 entity.Property(t => t.Status).IsRequired();
-
-                //One-to-many relationship with Teams (organizing team)
-                entity.HasOne(t => t.OrganizingTeam)
-                    .WithMany(t => t.OrganizedTournaments)
-                    .HasForeignKey(t => t.OrganizingTeamId)
-                    .OnDelete(DeleteBehavior.SetNull);
-
-                //Many-to-many relationship with Teams (playing teams)
-                entity.HasMany(t => t.Teams)
-                    .WithMany(t => t.Tournaments)
-                    .UsingEntity(j => j.ToTable("TeamTournaments"));
-
-                //One-to-many relationship with Games
+                
                 entity.HasMany(t => t.Games)
                     .WithOne(g => g.Tournament)
                     .HasForeignKey(g => g.TournamentId)
@@ -115,21 +80,13 @@ namespace sls_repos.Data
                 entity.HasKey(g => g.Id);
                 entity.Property(g => g.Round).IsRequired();
                 entity.Property(g => g.Score).IsRequired(false);
-
-                //One-to-many relationship with Tournament
-                entity.HasOne(g => g.Tournament)
-                    .WithMany(t => t.Games)
-                    .HasForeignKey(g => g.TournamentId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                //One-to-many relationship with Users (as White Player)
-                entity.HasOne(g => g.WhitePlayer)
+                
+                entity.HasOne<User>()
                     .WithMany(u => u.GamesAsWhite)
                     .HasForeignKey(g => g.WhitePlayerId)
                     .OnDelete(DeleteBehavior.SetNull);
-
-                //One-to-many relationship with Users (as Black Player)
-                entity.HasOne(g => g.BlackPlayer)
+                
+                entity.HasOne<User>()
                     .WithMany(u => u.GamesAsBlack)
                     .HasForeignKey(g => g.BlackPlayerId)
                     .OnDelete(DeleteBehavior.SetNull);
