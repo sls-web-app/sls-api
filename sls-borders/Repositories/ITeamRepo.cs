@@ -5,11 +5,11 @@ namespace sls_borders.Repositories
 {
     public interface ITeamRepo
     {
-        Task<List<GetTeamDto>> GetAllAsync();
-        Task<GetTeamDto?> GetByIdAsync(Guid id);
-        Task<GetTeamDto> CreateAsync(CreateTeamDto team);
-        Task<GetTeamDto?> UpdateAsync(Guid id, UpdateTeamDto updateTeamDto);
-        Task<GetTeamTournamentsDto> GetTeamTournamentsInfo(Guid teamId);
+        Task<List<Team>> GetAllAsync();
+        Task<Team?> GetByIdAsync(Guid id);
+        Task<Team> CreateAsync(CreateTeamDto team);
+        Task<Team?> UpdateAsync(Guid id, UpdateTeamDto updateTeamDto);
+        Task<Team> GetTeamTournamentsInfo(Guid teamId);
         Task<bool> DeleteAsync(Guid id);
     }
 }

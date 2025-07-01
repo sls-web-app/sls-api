@@ -2,16 +2,14 @@ using Microsoft.AspNetCore.Mvc;
 using sls_borders.DTO.Game;
 using sls_borders.Repositories;
 using sls_api.Utils;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using AutoMapper;
 
 namespace sls_api.Controllers;
 
 // summary: Kontroler API do zarządzania meczami.
 [ApiController]
 [Route("api/[controller]")]
-public class GameController(IGameRepo gameRepo) : ControllerBase
+public class GameController(IGameRepo gameRepo, IMapper mapper) : ControllerBase
 {
     // summary: Pobiera wszystkie mecze.
     // returns: Lista wszystkich meczów.
@@ -19,7 +17,7 @@ public class GameController(IGameRepo gameRepo) : ControllerBase
     public async Task<ActionResult<IEnumerable<GetGameDto>>> GetAllGames()
     {
         var games = await gameRepo.GetAllAsync();
-        return Ok(games);
+        return Ok(mapper.Map<List<GetGameDto>>(games));
     }
 
     // summary: Pobiera mecz na podstawie jego identyfikatora.
@@ -28,12 +26,9 @@ public class GameController(IGameRepo gameRepo) : ControllerBase
     [HttpGet("get-by-id/{id:guid}")]
     public async Task<ActionResult<GetGameDto>> GetGameById(Guid id)
     {
-        var game = await gameRepo.GetByIdAsync(id);
+        var game = await gameRepo.GetByIdAsync(id)!;
 
-        if (game == null)
-            return NotFound(new ErrorResponse { Message = $"Game with ID {id} not found" });
-
-        return Ok(game);
+        return Ok(mapper.Map<GetGameDto>(game));
     }
 
     // summary: Tworzy nowy mecz.
@@ -48,7 +43,7 @@ public class GameController(IGameRepo gameRepo) : ControllerBase
         try
         {
             var createdGame = await gameRepo.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetGameById), new { id = createdGame.Id }, createdGame);
+            return CreatedAtAction(nameof(GetGameById), new { id = createdGame.Id }, mapper.Map<GetGameDto>(createdGame));
         }
         catch (InvalidOperationException ex)
         {
@@ -73,7 +68,7 @@ public class GameController(IGameRepo gameRepo) : ControllerBase
             if (updatedGame == null)
                 return NotFound(new ErrorResponse { Message = $"Game with ID {id} not found" });
 
-            return Ok(updatedGame);
+            return Ok(mapper.Map<GetGameDto>(updatedGame));
         }
         catch (InvalidOperationException ex)
         {
@@ -95,3 +90,4 @@ public class GameController(IGameRepo gameRepo) : ControllerBase
         return NoContent();
     }
 }
+

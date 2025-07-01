@@ -2,24 +2,23 @@ using Microsoft.AspNetCore.Mvc;
 using sls_borders.DTO.Admin;
 using sls_borders.Repositories;
 using sls_api.Utils;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using AutoMapper;
 
 namespace sls_api.Controllers;
 
 // summary: Kontroler API do zarządzania administratorami.
 [ApiController]
 [Route("api/[controller]")]
-public class AdminController(IAdminRepo _adminRepo) : ControllerBase
+public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerBase
 {
     // summary: Pobiera listę wszystkich administratorów.
     // returns: Lista administratorów.
     [HttpGet("get-all")]
     public async Task<ActionResult<IEnumerable<GetAdminDto>>> GetAllAdmins()
     {
-        var admins = await _adminRepo.GetAllAsync();
-        return Ok(admins);
+        var admins = await adminRepo.GetAllAsync();
+        var adminDtos = mapper.Map<List<GetAdminDto>>(admins);
+        return Ok(adminDtos);
     }
 
     // summary: Pobiera administratora na podstawie identyfikatora.
@@ -28,12 +27,13 @@ public class AdminController(IAdminRepo _adminRepo) : ControllerBase
     [HttpGet("get-by-id/{id:guid}")]
     public async Task<ActionResult<GetAdminDto>> GetAdminById(Guid id)
     {
-        var admin = await _adminRepo.GetByIdAsync(id);
+        var admin = await adminRepo.GetByIdAsync(id);
 
         if (admin == null)
             return NotFound(new ErrorResponse { Message = $"Admin with ID {id} not found" });
 
-        return Ok(admin);
+        var dto = mapper.Map<GetAdminDto>(admin);
+        return Ok(dto);
     }
 
     // summary: Tworzy nowego administratora.
@@ -47,8 +47,9 @@ public class AdminController(IAdminRepo _adminRepo) : ControllerBase
 
         try
         {
-            var createdAdmin = await _adminRepo.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetAdminById), new { id = createdAdmin.Id }, createdAdmin);
+            var createdAdmin = await adminRepo.CreateAsync(dto);
+            var responseDto = mapper.Map<GetAdminDto>(createdAdmin);
+            return CreatedAtAction(nameof(GetAdminById), new { id = responseDto.Id }, responseDto);
         }
         catch (InvalidOperationException ex)
         {
@@ -68,12 +69,13 @@ public class AdminController(IAdminRepo _adminRepo) : ControllerBase
 
         try
         {
-            var updatedAdmin = await _adminRepo.UpdateAsync(id, dto);
+            var updatedAdmin = await adminRepo.UpdateAsync(id, dto);
 
             if (updatedAdmin == null)
                 return NotFound(new ErrorResponse { Message = $"Admin with ID {id} not found" });
 
-            return Ok(updatedAdmin);
+            var responseDto = mapper.Map<GetAdminDto>(updatedAdmin);
+            return Ok(responseDto);
         }
         catch (InvalidOperationException ex)
         {
@@ -87,7 +89,7 @@ public class AdminController(IAdminRepo _adminRepo) : ControllerBase
     [HttpDelete("delete/{id:guid}")]
     public async Task<ActionResult> DeleteAdmin(Guid id)
     {
-        var result = await _adminRepo.DeleteAsync(id);
+        var result = await adminRepo.DeleteAsync(id);
 
         if (!result)
             return NotFound(new ErrorResponse { Message = $"Admin with ID {id} not found" });
@@ -95,3 +97,4 @@ public class AdminController(IAdminRepo _adminRepo) : ControllerBase
         return NoContent();
     }
 }
+

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using sls_borders.Data;
-using sls_api.Configurations;
+using sls_api.Configuration;
 using Scalar.AspNetCore;
 using sls_borders.Mappings; 
 
@@ -12,7 +12,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
-builder.Services.AddAutoMapper(typeof(Program), typeof(AdminProfile));
+builder.Services.AddAutoMapper(typeof(AdminProfile), typeof(TeamProfile), typeof(TournamentProfile), typeof(GameProfile), typeof(UserProfile));
 
 //PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

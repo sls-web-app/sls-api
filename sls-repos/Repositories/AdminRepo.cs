@@ -7,80 +7,77 @@ using sls_borders.DTO.Admin;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace sls_repos.Repositories
+namespace sls_repos.Repositories;
+
+public class AdminRepo(ApplicationDbContext context, IMapper mapper) : IAdminRepo
 {
-    public class AdminRepo(ApplicationDbContext _context, IMapper _mapper) : IAdminRepo
+    public async Task<List<Admin>> GetAllAsync()
     {
+        return await context.Admins.ToListAsync();
+    }
 
-        public async Task<List<GetAdminDto>> GetAllAsync()
+    public async Task<Admin?> GetByIdAsync(Guid id)
+    {
+        return await context.Admins.FindAsync(id);
+    }
+
+    public async Task<Admin> CreateAsync(CreateAdminDto newAdmin)
+    {
+        var existingAdmin = await context.Admins
+            .FirstOrDefaultAsync(a => a.Username == newAdmin.Username);
+
+        if (existingAdmin != null)
         {
-            var admins = await _context.Admins.ToListAsync();
-            return _mapper.Map<List<GetAdminDto>>(admins);
+            throw new InvalidOperationException($"Username '{newAdmin.Username}' is already taken.");
         }
 
-        public async Task<GetAdminDto?> GetByIdAsync(Guid id)
-        {
-            var admin = await _context.Admins.FindAsync(id);
-            return admin != null ? _mapper.Map<GetAdminDto>(admin) : null;
-        }
+        var admin = mapper.Map<Admin>(newAdmin);
+        context.Admins.Add(admin);
+        await context.SaveChangesAsync();
+        return admin;
+    }
 
-        public async Task<GetAdminDto> CreateAsync(CreateAdminDto newAdmin)
+    public async Task<Admin?> UpdateAsync(Guid id, UpdateAdminDto adminDto)
+    {
+        var existingAdmin = await context.Admins.FindAsync(id);
+        if (existingAdmin == null) return null;
+
+        if (existingAdmin.Username != adminDto.Username)
         {
-            var existingAdmin = await _context.Admins
-                .FirstOrDefaultAsync(a => a.Username == newAdmin.Username);
-            
-            if (existingAdmin != null)
+            var usernameExists = await context.Admins
+                .AnyAsync(a => a.Username == adminDto.Username && a.Id != id);
+
+            if (usernameExists)
             {
-                throw new InvalidOperationException($"Username '{newAdmin.Username}' is already taken.");
+                throw new InvalidOperationException($"Username '{adminDto.Username}' is already taken.");
             }
-
-            var admin = _mapper.Map<Admin>(newAdmin);
-            _context.Admins.Add(admin);
-            await _context.SaveChangesAsync();
-            return _mapper.Map<GetAdminDto>(admin);
         }
 
-        public async Task<GetAdminDto?> UpdateAsync(Guid id, UpdateAdminDto adminDto)
+        existingAdmin.Username = adminDto.Username;
+
+        if (!string.IsNullOrEmpty(adminDto.Password))
         {
-            var existingAdmin = await _context.Admins.FindAsync(id);
-            if (existingAdmin == null) return null;
-            
-            if (existingAdmin.Username != adminDto.Username)
-            {
-                var usernameExists = await _context.Admins
-                    .AnyAsync(a => a.Username == adminDto.Username && a.Id != id);
-                
-                if (usernameExists)
-                {
-                    throw new InvalidOperationException($"Username '{adminDto.Username}' is already taken.");
-                }
-            }
-            
-            existingAdmin.Username = adminDto.Username;
-            
-            if (!string.IsNullOrEmpty(adminDto.Password))
-            {
-                using var hmac = new HMACSHA512();
-                var saltBytes = hmac.Key;
-                var passwordBytes = Encoding.UTF8.GetBytes(adminDto.Password);
-                var hashBytes = hmac.ComputeHash(passwordBytes);
-                
-                existingAdmin.PasswordHash = Convert.ToBase64String(hashBytes);
-                existingAdmin.PasswordSalt = Convert.ToBase64String(saltBytes);
-            }
+            using var hmac = new HMACSHA512();
+            var saltBytes = hmac.Key;
+            var passwordBytes = Encoding.UTF8.GetBytes(adminDto.Password);
+            var hashBytes = hmac.ComputeHash(passwordBytes);
 
-            await _context.SaveChangesAsync();
-            return _mapper.Map<GetAdminDto>(existingAdmin);
+            existingAdmin.PasswordHash = Convert.ToBase64String(hashBytes);
+            existingAdmin.PasswordSalt = Convert.ToBase64String(saltBytes);
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
-        {
-            var admin = await _context.Admins.FindAsync(id);
-            if (admin == null) return false;
+        await context.SaveChangesAsync();
+        return existingAdmin;
+    }
 
-            _context.Admins.Remove(admin);
-            await _context.SaveChangesAsync();
-            return true;
-        }
+    public async Task<bool> DeleteAsync(Guid id)
+    {
+        var admin = await context.Admins.FindAsync(id);
+        if (admin == null) return false;
+
+        context.Admins.Remove(admin);
+        await context.SaveChangesAsync();
+        return true;
     }
 }
+
