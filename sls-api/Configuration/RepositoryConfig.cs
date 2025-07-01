@@ -1,7 +1,7 @@
 using sls_borders.Repositories;
 using sls_repos.Repositories;
 
-namespace sls_api.Configurations
+namespace sls_api.Configuration
 {
     public static class RepositoryConfig
     {

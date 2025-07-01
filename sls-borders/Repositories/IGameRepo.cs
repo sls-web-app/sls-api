@@ -1,13 +1,14 @@
 using sls_borders.DTO.Game;
+using sls_borders.Models;
 
 namespace sls_borders.Repositories
 {
     public interface IGameRepo
     {
-        Task<List<GetGameDto>> GetAllAsync();
-        Task<GetGameDto?> GetByIdAsync(Guid id);
-        Task<GetGameDto> CreateAsync(CreateGameDto game);
-        Task<GetGameDto?> UpdateAsync(Guid id, UpdateGameDto game);
+        Task<List<Game>> GetAllAsync();
+        Task<Game>? GetByIdAsync(Guid id);
+        Task<Game> CreateAsync(CreateGameDto game);
+        Task<Game?> UpdateAsync(Guid id, UpdateGameDto game);
         Task<bool> DeleteAsync(Guid id);
     }
 }

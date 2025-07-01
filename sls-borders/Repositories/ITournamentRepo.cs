@@ -5,10 +5,10 @@ namespace sls_borders.Repositories
 {
     public interface ITournamentRepo
     {
-        Task<List<GetTournamentDto>> GetAllAsync();
-        Task<GetTournamentDto?> GetByIdAsync(Guid id);
-        Task<GetTournamentDto> CreateAsync(CreateTournamentDto tournament);
-        Task<GetTournamentDto?> UpdateAsync(Guid id, UpdateTournamentDto tournament);
+        Task<List<Tournament>> GetAllAsync();
+        Task<Tournament?> GetByIdAsync(Guid id);
+        Task<Tournament> CreateAsync(CreateTournamentDto tournament);
+        Task<Tournament?> UpdateAsync(Guid id, UpdateTournamentDto tournament);
         Task<bool> DeleteAsync(Guid id);
     }
 }

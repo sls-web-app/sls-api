@@ -7,13 +7,14 @@ using sls_api.Utils;
 using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using AutoMapper;
 
 namespace sls_api.Controllers;
 
 // summary: Kontroler API do zarządzania użytkownikami.
 [ApiController]
 [Route("api/[controller]")]
-public class UserController(IUserRepo userRepo, ApplicationDbContext dbContext) : ControllerBase
+public class UserController(IUserRepo userRepo, ApplicationDbContext dbContext, IMapper mapper) : ControllerBase
 {
     // summary: Pobiera wszystkich użytkowników.
     // returns: Lista wszystkich użytkowników.
@@ -21,7 +22,7 @@ public class UserController(IUserRepo userRepo, ApplicationDbContext dbContext) 
     public async Task<ActionResult<IEnumerable<GetUserDto>>> GetAllUsers()
     {
         var users = await userRepo.GetAllAsync();
-        return Ok(users);
+        return Ok(mapper.Map<List<GetUserDto>>(users));
     }
 
     // summary: Pobiera użytkownika na podstawie jego identyfikatora.
@@ -35,7 +36,7 @@ public class UserController(IUserRepo userRepo, ApplicationDbContext dbContext) 
         if (user == null)
             return NotFound(new ErrorResponse { Message = $"User with ID {id} not found" });
 
-        return Ok(user);
+        return Ok(mapper.Map<GetUserDto>(user));
     }
 
     // summary: Pobiera użytkownika na podstawie adresu e-mail.
@@ -49,7 +50,7 @@ public class UserController(IUserRepo userRepo, ApplicationDbContext dbContext) 
         if (user == null)
             return NotFound(new ErrorResponse { Message = $"User with email {email} not found" });
 
-        return Ok(user);
+        return Ok(mapper.Map<GetUserDto>(user));
     }
 
     // summary: Tworzy nowego użytkownika.
@@ -70,7 +71,11 @@ public class UserController(IUserRepo userRepo, ApplicationDbContext dbContext) 
         try
         {
             var createdUser = await userRepo.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, createdUser);
+            return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, mapper.Map<GetUserDto>(createdUser));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new ErrorResponse { Message = ex.Message });
         }
         catch (Exception ex)
         {
@@ -95,7 +100,7 @@ public class UserController(IUserRepo userRepo, ApplicationDbContext dbContext) 
             if (updatedUser == null)
                 return NotFound(new ErrorResponse { Message = $"User with ID {id} not found" });
 
-            return Ok(updatedUser);
+            return Ok(mapper.Map<GetUserDto>(updatedUser));
         }
         catch (Exception ex)
         {
@@ -128,3 +133,4 @@ public class UserController(IUserRepo userRepo, ApplicationDbContext dbContext) 
         return Ok(exists);
     }
 }
+
