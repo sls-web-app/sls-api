@@ -5,6 +5,7 @@ namespace sls_borders.Enums
         User,
         Student,
         Lider,
-        Teacher
+        Teacher,
+        Admin
     }
 }

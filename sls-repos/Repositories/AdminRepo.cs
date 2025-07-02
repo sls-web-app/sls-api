@@ -11,6 +11,28 @@ namespace sls_repos.Repositories;
 
 public class AdminRepo(ApplicationDbContext context, IMapper mapper) : IAdminRepo
 {
+    public async Task<Admin?> LoginAsync(string username, string password)
+    {
+        var admin = await context.Admins.FirstOrDefaultAsync(a => a.Username == username);
+        Console.WriteLine(username);
+        Console.WriteLine(password);
+        Console.WriteLine(admin?.Username);
+        Console.WriteLine(admin?.PasswordHash);
+
+        if (admin == null) return null;
+
+        using var hmac = new HMACSHA512(Convert.FromBase64String(admin.PasswordSalt));
+        Console.WriteLine(Convert.ToBase64String(hmac.Key));
+        Console.WriteLine(admin.PasswordSalt);
+        var passwordBytes = Encoding.UTF8.GetBytes(password);
+        var computedHash = hmac.ComputeHash(passwordBytes);
+        Console.WriteLine(Convert.ToBase64String(computedHash));
+
+        if (Convert.ToBase64String(computedHash) != admin.PasswordHash) return null;
+
+        return admin;
+    }
+
     public async Task<List<Admin>> GetAllAsync()
     {
         return await context.Admins.ToListAsync();
