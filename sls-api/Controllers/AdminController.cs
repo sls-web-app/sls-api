@@ -7,15 +7,27 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace sls_api.Controllers;
 
-// summary: Kontroler API do zarządzania administratorami.
+/// <summary>
+/// API controller for administrator management.
+/// Provides CRUD operations for administrators including creation, retrieval, updates, and deletion.
+/// All operations require Admin role authorization.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerBase
 {
-    // summary: Pobiera listę wszystkich administratorów.
-    // returns: Lista administratorów.
-    [HttpGet("get-all")]
+    /// <summary>
+    /// Retrieves all administrators from the system.
+    /// </summary>
+    /// <returns>A collection of administrator objects.</returns>
+    /// <response code="200">Returns the list of all administrators.</response>
+    /// <response code="401">Returns unauthorized if not authenticated.</response>
+    /// <response code="403">Returns forbidden if not authorized as Admin.</response>
     [Authorize(Roles = "Admin")]
+    [HttpGet("get-all")]
+    [ProducesResponseType<IEnumerable<GetAdminDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<IEnumerable<GetAdminDto>>> GetAllAdmins()
     {
         var admins = await adminRepo.GetAllAsync();
@@ -23,10 +35,21 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
         return Ok(adminDtos);
     }
 
-    // summary: Pobiera administratora na podstawie identyfikatora.
-    // param: id – Unikalny identyfikator administratora.
-    // returns: Administrator lub kod 404, jeśli nie znaleziono.
+    /// <summary>
+    /// Retrieves a specific administrator by their unique identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the administrator.</param>
+    /// <returns>The administrator details if found, otherwise a 404 error.</returns>
+    /// <response code="200">Returns the administrator details.</response>
+    /// <response code="401">Returns unauthorized if not authenticated.</response>
+    /// <response code="403">Returns forbidden if not authorized as Admin.</response>
+    /// <response code="404">Returns not found if the administrator does not exist.</response>
+    [Authorize(Roles = "Admin")]
     [HttpGet("get-by-id/{id:guid}")]
+    [ProducesResponseType<GetAdminDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<GetAdminDto>> GetAdminById(Guid id)
     {
         var admin = await adminRepo.GetByIdAsync(id);
@@ -38,10 +61,23 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
         return Ok(dto);
     }
 
-    // summary: Tworzy nowego administratora.
-    // param: dto – Dane nowego administratora.
-    // returns: Utworzony administrator lub kod błędu walidacji/konfliktu.
+    /// <summary>
+    /// Creates a new administrator in the system.
+    /// </summary>
+    /// <param name="dto">The administrator data for creation.</param>
+    /// <returns>The created administrator or validation/conflict errors.</returns>
+    /// <response code="201">Returns the newly created administrator.</response>
+    /// <response code="400">Returns validation errors if the request model is invalid.</response>
+    /// <response code="401">Returns unauthorized if not authenticated.</response>
+    /// <response code="403">Returns forbidden if not authorized as Admin.</response>
+    /// <response code="409">Returns conflict if the administrator already exists.</response>
+    [Authorize(Roles = "Admin")]
     [HttpPost("create")]
+    [ProducesResponseType<GetAdminDto>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<GetAdminDto>> CreateAdmin([FromBody] CreateAdminDto dto)
     {
         if (!ModelState.IsValid)
@@ -59,11 +95,26 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
         }
     }
 
-    // summary: Aktualizuje dane administratora.
-    // param: id – Unikalny identyfikator administratora.
-    // param: dto – Nowe dane administratora.
-    // returns: Zaktualizowany administrator lub kod błędu/404.
+    /// <summary>
+    /// Updates an existing administrator with new data.
+    /// </summary>
+    /// <param name="id">The unique identifier of the administrator to update.</param>
+    /// <param name="dto">The updated administrator data.</param>
+    /// <returns>The updated administrator or error/404 responses.</returns>
+    /// <response code="200">Returns the updated administrator.</response>
+    /// <response code="400">Returns validation errors if the request model is invalid.</response>
+    /// <response code="401">Returns unauthorized if not authenticated.</response>
+    /// <response code="403">Returns forbidden if not authorized as Admin.</response>
+    /// <response code="404">Returns not found if the administrator does not exist.</response>
+    /// <response code="409">Returns conflict if there's a business logic violation.</response>
+    [Authorize(Roles = "Admin")]
     [HttpPut("update/{id:guid}")]
+    [ProducesResponseType<GetAdminDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<GetAdminDto>> UpdateAdmin(Guid id, [FromBody] UpdateAdminDto dto)
     {
         if (!ModelState.IsValid)
@@ -85,10 +136,21 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
         }
     }
 
-    // summary: Usuwa administratora.
-    // param: id – Unikalny identyfikator administratora.
-    // returns: Kod 204 jeśli usunięto, lub kod 404 jeśli nie znaleziono.
+    /// <summary>
+    /// Deletes an administrator from the system.
+    /// </summary>
+    /// <param name="id">The unique identifier of the administrator to delete.</param>
+    /// <returns>No content if successful, or 404 if not found.</returns>
+    /// <response code="204">Returns no content if the administrator was successfully deleted.</response>
+    /// <response code="401">Returns unauthorized if not authenticated.</response>
+    /// <response code="403">Returns forbidden if not authorized as Admin.</response>
+    /// <response code="404">Returns not found if the administrator does not exist.</response>
+    [Authorize(Roles = "Admin")]
     [HttpDelete("delete/{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> DeleteAdmin(Guid id)
     {
         var result = await adminRepo.DeleteAsync(id);

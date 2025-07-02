@@ -5,24 +5,38 @@ using AutoMapper;
 using sls_borders.DTO.ErrorDto;
 
 namespace sls_api.Controllers;
-// summary: Kontroler API do zarządzania drużynami.
+
+/// <summary>
+/// API controller for team management.
+/// Provides CRUD operations for teams including creation, retrieval, updates, deletion, and tournament information.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class TeamController(ITeamRepo teamRepo, IMapper mapper) : ControllerBase
 {
-    // summary: Pobiera wszystkie drużyny.
-    // returns: Lista wszystkich drużyn.
+    /// <summary>
+    /// Retrieves all teams from the system.
+    /// </summary>
+    /// <returns>A collection of all teams.</returns>
+    /// <response code="200">Returns the list of all teams.</response>
     [HttpGet("get-all")]
+    [ProducesResponseType<IEnumerable<GetTeamDto>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<GetTeamDto>>> GetAllTeams()
     {
         var teams = await teamRepo.GetAllAsync();
         return Ok(mapper.Map<List<GetTeamDto>>(teams));
     }
 
-    // summary: Pobiera drużynę na podstawie jej identyfikatora.
-    // param: id – Identyfikator drużyny.
-    // returns: Szczegóły drużyny lub kod 404, jeśli nie znaleziono.
+    /// <summary>
+    /// Retrieves a specific team by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the team.</param>
+    /// <returns>The team details if found, otherwise a 404 error.</returns>
+    /// <response code="200">Returns the team details.</response>
+    /// <response code="404">Returns not found if the team does not exist.</response>
     [HttpGet("get-by-id/{id:guid}")]
+    [ProducesResponseType<GetTeamDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<GetTeamDto>> GetTeamById(Guid id)
     {
         var team = await teamRepo.GetByIdAsync(id);
@@ -33,10 +47,16 @@ public class TeamController(ITeamRepo teamRepo, IMapper mapper) : ControllerBase
         return Ok(mapper.Map<GetTeamDto>(team));
     }
 
-    // summary: Pobiera informacje o turniejach, w których brała udział dana drużyna.
-    // param: id – Identyfikator drużyny.
-    // returns: Lista turniejów lub kod 404, jeśli drużyna nie istnieje.
+    /// <summary>
+    /// Retrieves information about tournaments in which the specified team has participated.
+    /// </summary>
+    /// <param name="id">The unique identifier of the team.</param>
+    /// <returns>A list of tournaments or a 404 error if the team does not exist.</returns>
+    /// <response code="200">Returns the list of tournaments for the team.</response>
+    /// <response code="404">Returns not found if the team does not exist.</response>
     [HttpGet("get-tournaments/{id:guid}")]
+    [ProducesResponseType<GetTeamTournamentsDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<GetTeamTournamentsDto>> GetTeamTournaments(Guid id)
     {
         try
@@ -50,10 +70,16 @@ public class TeamController(ITeamRepo teamRepo, IMapper mapper) : ControllerBase
         }
     }
 
-    // summary: Tworzy nową drużynę.
-    // param: dto – Dane nowej drużyny.
-    // returns: Utworzona drużyna lub błąd walidacji.
+    /// <summary>
+    /// Creates a new team in the system.
+    /// </summary>
+    /// <param name="dto">The team data for creation.</param>
+    /// <returns>The created team or validation errors.</returns>
+    /// <response code="201">Returns the newly created team.</response>
+    /// <response code="400">Returns validation errors if the request model is invalid.</response>
     [HttpPost("create")]
+    [ProducesResponseType<GetTeamDto>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateTeam([FromBody] CreateTeamDto dto)
     {
         if (!ModelState.IsValid)
@@ -63,11 +89,19 @@ public class TeamController(ITeamRepo teamRepo, IMapper mapper) : ControllerBase
         return CreatedAtAction(nameof(GetTeamById), new { id = createdTeam.Id }, mapper.Map<GetTeamDto>(createdTeam));
     }
 
-    // summary: Aktualizuje dane istniejącej drużyny.
-    // param: id – Identyfikator drużyny.
-    // param: updateDto – Nowe dane drużyny.
-    // returns: Zaktualizowana drużyna lub kod 404, jeśli nie znaleziono.
+    /// <summary>
+    /// Updates an existing team with new data.
+    /// </summary>
+    /// <param name="id">The unique identifier of the team to update.</param>
+    /// <param name="updateDto">The updated team data.</param>
+    /// <returns>The updated team or a 404 error if not found.</returns>
+    /// <response code="200">Returns the updated team.</response>
+    /// <response code="400">Returns validation errors if the request model is invalid.</response>
+    /// <response code="404">Returns not found if the team does not exist.</response>
     [HttpPut("update/{id:guid}")]
+    [ProducesResponseType<GetTeamDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateTeam(Guid id, [FromBody] UpdateTeamDto updateDto)
     {
         if (!ModelState.IsValid)
@@ -81,10 +115,16 @@ public class TeamController(ITeamRepo teamRepo, IMapper mapper) : ControllerBase
         return Ok(mapper.Map<GetTeamDto>(updatedTeam));
     }
 
-    // summary: Usuwa drużynę.
-    // param: id – Identyfikator drużyny.
-    // returns: Kod 204 jeśli usunięto, lub 404 jeśli nie znaleziono.
+    /// <summary>
+    /// Deletes a team from the system.
+    /// </summary>
+    /// <param name="id">The unique identifier of the team to delete.</param>
+    /// <returns>No content if successful, or 404 if not found.</returns>
+    /// <response code="204">Returns no content if the team was successfully deleted.</response>
+    /// <response code="404">Returns not found if the team does not exist.</response>
     [HttpDelete("delete/{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteTeam(Guid id)
     {
         var result = await teamRepo.DeleteAsync(id);

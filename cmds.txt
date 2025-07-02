@@ -1,4 +1,0 @@
-dotnet ef migrations add Update --startup-project . --project ../sls-repos
-dotnet ef database update --startup-project . --project ../sls-repos
-
-RUN IN sls-api/sls-api DIRECTORY !!!
