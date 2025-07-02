@@ -1,4 +1,4 @@
-namespace sls_api.Utils;
+namespace sls_borders.DTO.ErrorDto;
 
 public class ErrorResponse
 {

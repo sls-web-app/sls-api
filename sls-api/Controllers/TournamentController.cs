@@ -1,11 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using sls_borders.DTO.TournamentDto;
 using sls_borders.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using AutoMapper;
-using sls_api.Utils;
+using sls_borders.DTO.ErrorDto;
 
 namespace sls_api.Controllers;
 // summary: Kontroler API do zarządzania turniejami.

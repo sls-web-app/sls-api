@@ -6,11 +6,24 @@ using Microsoft.EntityFrameworkCore;
 using sls_borders.DTO.Admin;
 using System.Security.Cryptography;
 using System.Text;
+using sls_utils.AuthUtils;
 
 namespace sls_repos.Repositories;
 
 public class AdminRepo(ApplicationDbContext context, IMapper mapper) : IAdminRepo
 {
+    public async Task<Admin?> LoginAsync(string username, string password)
+    {
+        var admin = await context.Admins.FirstOrDefaultAsync(a => a.Username == username);
+
+        if (admin == null) return null;
+
+        string computedHash = HashingUtils.HashPassword(password, admin.PasswordSalt).Hash;
+        if (computedHash != admin.PasswordHash) return null;
+
+        return admin;
+    }
+
     public async Task<List<Admin>> GetAllAsync()
     {
         return await context.Admins.ToListAsync();
@@ -32,6 +45,9 @@ public class AdminRepo(ApplicationDbContext context, IMapper mapper) : IAdminRep
         }
 
         var admin = mapper.Map<Admin>(newAdmin);
+        (string passwordHash, string passwordSalt) = HashingUtils.HashPassword(newAdmin.Password);
+        admin.PasswordHash = passwordHash;
+        admin.PasswordSalt = passwordSalt;
         context.Admins.Add(admin);
         await context.SaveChangesAsync();
         return admin;
