@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using sls_borders.DTO.Admin;
 using System.Security.Cryptography;
 using System.Text;
+using sls_utils.AuthUtils;
 
 namespace sls_repos.Repositories;
 
@@ -14,21 +15,11 @@ public class AdminRepo(ApplicationDbContext context, IMapper mapper) : IAdminRep
     public async Task<Admin?> LoginAsync(string username, string password)
     {
         var admin = await context.Admins.FirstOrDefaultAsync(a => a.Username == username);
-        Console.WriteLine(username);
-        Console.WriteLine(password);
-        Console.WriteLine(admin?.Username);
-        Console.WriteLine(admin?.PasswordHash);
 
         if (admin == null) return null;
 
-        using var hmac = new HMACSHA512(Convert.FromBase64String(admin.PasswordSalt));
-        Console.WriteLine(Convert.ToBase64String(hmac.Key));
-        Console.WriteLine(admin.PasswordSalt);
-        var passwordBytes = Encoding.UTF8.GetBytes(password);
-        var computedHash = hmac.ComputeHash(passwordBytes);
-        Console.WriteLine(Convert.ToBase64String(computedHash));
-
-        if (Convert.ToBase64String(computedHash) != admin.PasswordHash) return null;
+        string computedHash = HashingUtils.HashPassword(password, admin.PasswordSalt).Hash;
+        if (computedHash != admin.PasswordHash) return null;
 
         return admin;
     }
@@ -54,6 +45,9 @@ public class AdminRepo(ApplicationDbContext context, IMapper mapper) : IAdminRep
         }
 
         var admin = mapper.Map<Admin>(newAdmin);
+        (string passwordHash, string passwordSalt) = HashingUtils.HashPassword(newAdmin.Password);
+        admin.PasswordHash = passwordHash;
+        admin.PasswordSalt = passwordSalt;
         context.Admins.Add(admin);
         await context.SaveChangesAsync();
         return admin;

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using sls_borders.DTO.Team;
 using sls_borders.Repositories;
 using AutoMapper;
-using sls_api.Utils;
+using sls_borders.DTO.ErrorDto;
 
 namespace sls_api.Controllers;
 // summary: Kontroler API do zarządzania drużynami.

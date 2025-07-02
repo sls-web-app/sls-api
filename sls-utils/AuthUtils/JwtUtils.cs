@@ -4,7 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace sls_api.Utils;
+namespace sls_utils.AuthUtils;
 
 public class JwtUtils
 {
@@ -12,6 +12,7 @@ public class JwtUtils
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha512Signature);
+
 
         var claims = new List<Claim>
         {

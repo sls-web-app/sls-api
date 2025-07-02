@@ -1,16 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
 using sls_borders.Repositories;
-using sls_api.Utils;
+using sls_utils.AuthUtils;
 using sls_borders.DTO.Admin;
 using sls_borders.Enums;
 using sls_borders.Models;
+using sls_borders.DTO.ErrorDto;
 
 
 namespace sls_api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(IAdminRepo adminRepo) : ControllerBase
+public class AuthController(IAdminRepo adminRepo, IConfiguration configuration) : ControllerBase
 {
     // summary: Logowanie administratora.
     // param: dto – Dane logowania administratora.
@@ -23,7 +24,8 @@ public class AuthController(IAdminRepo adminRepo) : ControllerBase
         Admin? admin = await adminRepo.LoginAsync(dto.Username, dto.Password);
         if (admin == null) return Unauthorized(new ErrorResponse { Message = "Invalid username or password" });
 
-        string token = JwtUtils.GenerateJwtToken(admin.Id, admin.Username, Role.Admin, "your-secret-key");
+        var keyString = configuration["Jwt:Key"] ?? throw new ArgumentNullException("JWT key is not configured.");
+        string token = JwtUtils.GenerateJwtToken(admin.Id, admin.Username, Role.Admin, keyString);
         return Ok(new LoginAdminResponseDto { Token = token });
     }
 }

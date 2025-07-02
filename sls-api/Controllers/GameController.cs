@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using sls_borders.DTO.Game;
 using sls_borders.Repositories;
-using sls_api.Utils;
 using AutoMapper;
+using sls_borders.DTO.ErrorDto;
 
 namespace sls_api.Controllers;
 

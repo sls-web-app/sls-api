@@ -13,28 +13,15 @@ namespace sls_borders.Mappings
             CreateMap<CreateAdminDto, Admin>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
-                .ForMember(dest => dest.PasswordHash, opt => opt.MapFrom(src => HashPassword(src.Password).Hash))
-                .ForMember(dest => dest.PasswordSalt, opt => opt.MapFrom(src => HashPassword(src.Password).Salt));
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+                .ForMember(dest => dest.PasswordSalt, opt => opt.Ignore());
 
             CreateMap<UpdateAdminDto, Admin>()
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
-                .ForMember(dest => dest.PasswordHash, opt => opt.Condition(src => src.Password != null))
-                .ForMember(dest => dest.PasswordHash, opt => opt.MapFrom(src => 
-                    src.Password != null ? HashPassword(src.Password).Hash : string.Empty))
-                .ForMember(dest => dest.PasswordSalt, opt => opt.Condition(src => src.Password != null))
-                .ForMember(dest => dest.PasswordSalt, opt => opt.MapFrom(src => 
-                    src.Password != null ? HashPassword(src.Password).Salt : string.Empty));
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+                .ForMember(dest => dest.PasswordSalt, opt => opt.Ignore());
                 
             CreateMap<Admin, GetAdminDto>();
-        }
-
-        private (string Hash, string Salt) HashPassword(string password)
-        {
-            using var hmac = new HMACSHA512();
-            var saltBytes = hmac.Key;
-            var passwordBytes = Encoding.UTF8.GetBytes(password);
-            var hashBytes = hmac.ComputeHash(passwordBytes);
-            return (Convert.ToBase64String(hashBytes), Convert.ToBase64String(saltBytes));
         }
     }
 }

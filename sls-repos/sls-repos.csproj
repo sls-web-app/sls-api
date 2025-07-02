@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\sls-borders\sls-borders.csproj" />
+    <ProjectReference Include="..\sls-utils\sls-utils.csproj" />
   </ItemGroup>
 
 </Project>

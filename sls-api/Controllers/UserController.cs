@@ -3,11 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using sls_borders.Data;
 using sls_borders.DTO.UserDto;
 using sls_borders.Repositories;
-using sls_api.Utils;
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using AutoMapper;
+using sls_borders.DTO.ErrorDto;
 
 namespace sls_api.Controllers;
 

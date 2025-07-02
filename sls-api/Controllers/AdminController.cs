@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using sls_borders.DTO.Admin;
 using sls_borders.Repositories;
-using sls_api.Utils;
+using sls_borders.DTO.ErrorDto;
 using AutoMapper;
 
 namespace sls_api.Controllers;
