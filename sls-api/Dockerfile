@@ -13,6 +13,9 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["sls-api/sls-api.csproj", "sls-api/"]
+COPY ["sls-borders/sls-borders.csproj", "sls-borders/"]
+COPY ["sls-repos/sls-repos.csproj", "sls-repos/"]
+COPY ["sls-utils/sls-utils.csproj", "sls-utils/"]
 RUN dotnet restore "./sls-api/sls-api.csproj"
 COPY . .
 WORKDIR "/src/sls-api"

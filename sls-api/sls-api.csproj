@@ -7,6 +7,9 @@
     <RootNamespace>sls_api</RootNamespace>
     <UserSecretsId>f04150d2-785a-454e-9906-6580922df884</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,7 +24,7 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.5.3" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.6.0" />
-</ItemGroup>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\sls-borders\sls-borders.csproj" />

@@ -1,0 +1,6 @@
+services:
+  sls-api:
+    image: ${DOCKER_REGISTRY-}slsapi
+    build:
+      context: .
+      dockerfile: sls-api/Dockerfile
