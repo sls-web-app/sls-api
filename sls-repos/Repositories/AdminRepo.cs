@@ -73,13 +73,9 @@ public class AdminRepo(ApplicationDbContext context, IMapper mapper) : IAdminRep
 
         if (!string.IsNullOrEmpty(adminDto.Password))
         {
-            using var hmac = new HMACSHA512();
-            var saltBytes = hmac.Key;
-            var passwordBytes = Encoding.UTF8.GetBytes(adminDto.Password);
-            var hashBytes = hmac.ComputeHash(passwordBytes);
-
-            existingAdmin.PasswordHash = Convert.ToBase64String(hashBytes);
-            existingAdmin.PasswordSalt = Convert.ToBase64String(saltBytes);
+            (string passwordHash, string passwordSalt) = HashingUtils.HashPassword(adminDto.Password);
+            existingAdmin.PasswordHash = passwordHash;
+            existingAdmin.PasswordSalt = passwordSalt;
         }
 
         await context.SaveChangesAsync();

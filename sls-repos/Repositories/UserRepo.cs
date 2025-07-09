@@ -51,6 +51,10 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
             user.Team = team;
         }
 
+        (string passwordHash, string passwordSalt) = HashingUtils.HashPassword(createUserDto.Password);
+        user.PasswordHash = passwordHash;
+        user.PasswordSalt = passwordSalt;
+
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
@@ -64,16 +68,27 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
 
     public async Task<User?> UpdateAsync(Guid id, UpdateUserDto updateUserDto)
     {
-        var existingUser = await context.Users
-            .Include(u => u.Team)
-            .Include(u => u.GamesAsWhite)
-            .Include(u => u.GamesAsBlack)
-            .FirstOrDefaultAsync(u => u.Id == id);
+        var existingUser = await GetByIdAsync(id);
 
-        if (existingUser == null)
-            return null;
+        if (existingUser == null) return null;
+
+        if(existingUser.Email != updateUserDto.Email)
+        {
+            var emailExists = await EmailExistsAsync(updateUserDto.Email);
+            if (emailExists)
+            {
+                throw new InvalidOperationException($"Email '{updateUserDto.Email}' is already in use.");
+            }
+        }
 
         mapper.Map(updateUserDto, existingUser);
+
+        if (!string.IsNullOrEmpty(updateUserDto.Password))
+        {
+            (string passwordHash, string passwordSalt) = HashingUtils.HashPassword(updateUserDto.Password);
+            existingUser.PasswordHash = passwordHash;
+            existingUser.PasswordSalt = passwordSalt;
+        }
 
         context.Users.Update(existingUser);
         await context.SaveChangesAsync();
