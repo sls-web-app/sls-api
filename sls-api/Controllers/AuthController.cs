@@ -5,6 +5,7 @@ using sls_borders.DTO.Admin;
 using sls_borders.Enums;
 using sls_borders.Models;
 using sls_borders.DTO.ErrorDto;
+using sls_borders.DTO.UserDto;
 
 namespace sls_api.Controllers;
 
@@ -16,7 +17,7 @@ namespace sls_api.Controllers;
 [Route("api/[controller]")]
 [Produces("application/json")]
 [Tags("Authentication")]
-public class AuthController(IAdminRepo adminRepo, IConfiguration configuration) : ControllerBase
+public class AuthController(IAdminRepo adminRepo, IUserRepo userRepo, IConfiguration configuration) : ControllerBase
 {
     /// <summary>
     /// Authenticates an administrator and returns a JWT token.
@@ -40,5 +41,18 @@ public class AuthController(IAdminRepo adminRepo, IConfiguration configuration) 
         var keyString = configuration["Jwt:Key"] ?? throw new ArgumentNullException("JWT key is not configured.");
         string token = JwtUtils.GenerateJwtToken(admin.Id, admin.Username, Role.Admin, keyString);
         return Ok(new LoginAdminResponseDto { Token = token });
+    }
+
+    [HttpPost("login")]
+    public async Task<ActionResult> LoginUser([FromBody] LoginUserDto dto)
+    {
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
+
+        User? user = await userRepo.LoginAsync(dto.Email, dto.Password);
+        if (user == null) return Unauthorized(new ErrorResponse { Message = "Invalid email or password" });
+
+        var keyString = configuration["Jwt:Key"] ?? throw new ArgumentNullException("JWT key is not configured.");
+        string token = JwtUtils.GenerateJwtToken(user.Id, user.Email, Role.User, keyString);
+        return Ok(new LoginUserResponseDto { Token = token });
     }
 }

@@ -4,10 +4,23 @@ using sls_borders.Data;
 using sls_borders.DTO.UserDto;
 using sls_borders.Models;
 using sls_borders.Repositories;
+using sls_utils.AuthUtils;
 
 namespace sls_repos.Repositories;
 public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
 {
+    public async Task<User?> LoginAsync(string email, string password)
+    {
+        var user = await GetByEmailAsync(email);
+
+        if (user == null) return null;
+
+        string computedHash = HashingUtils.HashPassword(password, user.PasswordSalt).Hash;
+        if (computedHash != user.PasswordHash) return null;
+
+        return user;
+    }
+
     public async Task<List<User>> GetAllAsync()
     {
         return await context.Users
