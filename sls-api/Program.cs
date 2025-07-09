@@ -35,7 +35,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
                 builder.Configuration["Jwt:Key"] ?? throw new ArgumentNullException("JWT key is not configured."))),
             ValidateIssuer = false,
-            ValidateAudience = false
+            ValidateAudience = false,
+            
         };
     });
 
