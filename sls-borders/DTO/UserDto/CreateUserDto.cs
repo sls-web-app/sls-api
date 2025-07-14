@@ -1,5 +1,3 @@
-using sls_borders.DTO.Game;
-using sls_borders.DTO.Team;
 using sls_borders.Enums;
 
 namespace sls_borders.DTO.UserDto;
