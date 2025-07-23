@@ -7,7 +7,7 @@ namespace sls_borders.Repositories
     {
         Task<List<User>> GetAllAsync();
         Task<User?> GetByIdAsync(Guid id);
-        Task<User> CreateAsync(CreateUserDto getUserDto);
+        Task<User> CreateAsync(CreateUserDto getUserDto, IEmailRepo emailRepo);
         Task<User?> UpdateAsync(Guid id, UpdateUserDto getUserDto);
         Task<bool> DeleteAsync(Guid id);
 

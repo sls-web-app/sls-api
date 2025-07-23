@@ -39,7 +39,7 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
             .FirstOrDefaultAsync(u => u.Id == id);
     }
 
-    public async Task<User> CreateAsync(CreateUserDto createUserDto)
+    public async Task<User> CreateAsync(CreateUserDto createUserDto, IEmailRepo emailRepo)
     {
         var user = mapper.Map<User>(createUserDto);
 
@@ -57,6 +57,27 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
 
         context.Users.Add(user);
         await context.SaveChangesAsync();
+        await emailRepo.SendEmailAsync(user.Email, "Confirm Your Email",
+            $@"
+                <div style='font-family: Arial, sans-serif; background: #f9f9f9; padding: 30px;'>
+                    <div style='max-width: 500px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 32px;'>
+                        <h2 style='color: #2d7ff9; text-align: center;'>Welcome to Minesweeper Battle!</h2>
+                        <p style='font-size: 16px; color: #333; text-align: center;'>
+                            Thank you for registering.<br>
+                            Please confirm your email address to activate your account.
+                        </p>
+                        <div style='text-align: center; margin: 32px 0;'>
+                            <a href='' 
+                            style='background: #2d7ff9; color: #fff; text-decoration: none; padding: 14px 28px; border-radius: 5px; font-size: 16px; display: inline-block;'>
+                                Confirm Email
+                            </a>
+                        </div>
+                        <p style='font-size: 13px; color: #888; text-align: center;'>
+                            If you did not create an account, you can safely ignore this email.
+                        </p>
+                    </div>
+                </div>
+                ");
 
         // Reload the user with related data
         return await context.Users
