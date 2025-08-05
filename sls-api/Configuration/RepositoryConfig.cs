@@ -12,6 +12,7 @@ namespace sls_api.Configuration
             services.AddScoped<ITeamRepo, TeamRepo>();
             services.AddScoped<ITournamentRepo, TournamentRepo>();
             services.AddScoped<IUserRepo, UserRepo>();
+            services.AddScoped<IEditionRepo, EditionRepo>();
 
             return services;
         }

@@ -12,6 +12,7 @@ namespace sls_borders.Data
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Tournament> Tournaments { get; set; } = null!;
         public DbSet<Game> Games { get; set; } = null!;
+        public DbSet<Edition> Editions { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -94,6 +95,32 @@ namespace sls_borders.Data
                 entity.HasOne<User>()
                     .WithMany(u => u.GamesAsBlack)
                     .HasForeignKey(g => g.BlackPlayerId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<Edition>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Number).IsRequired();
+                entity.Property(e => e.StartDate)
+                    .HasColumnType("date");
+                entity.Property(e => e.EndDate)
+                    .HasColumnType("date");
+                entity.Property(e => e.Organizer).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.CreatedAt).HasConversion(
+                    v => v,
+                    v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
+                );
+
+                //One-to-many relationship with Teams
+                entity.HasMany(e => e.Teams)
+                    .WithOne(t => t.Edition)
+                    .HasForeignKey(t => t.EditionId)
+                    .OnDelete(DeleteBehavior.SetNull);
+                //One-to-many relationship with Tournaments
+                entity.HasMany(e => e.Tournaments)
+                    .WithOne(t => t.Edition)
+                    .HasForeignKey(t => t.EditionId)
                     .OnDelete(DeleteBehavior.SetNull);
             });
 

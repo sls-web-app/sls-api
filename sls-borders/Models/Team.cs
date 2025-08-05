@@ -10,6 +10,9 @@ namespace sls_borders.Models
         public string Address { get; set; } = null!;
         public string Img { get; set; } = null!;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public Guid EditionId { get; set; } = Guid.Empty;
+        public Edition Edition { get; set; } = null!;
+
 
         public ICollection<User> Users { get; set; } = new List<User>();
         public ICollection<Tournament> Tournaments { get; set; } = new List<Tournament>();
