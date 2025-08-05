@@ -30,8 +30,13 @@ namespace sls_borders.Data
             {
                 entity.HasKey(t => t.Id);
                 entity.Property(t => t.Name).IsRequired().HasMaxLength(100);
-                entity.Property(t => t.Adress).IsRequired().HasMaxLength(200);
-                entity.Property(t => t.Img).IsRequired().HasMaxLength(200);
+                entity.Property(t => t.Short).IsRequired().HasMaxLength(20);
+                entity.Property(t => t.Address).IsRequired().HasMaxLength(200);
+                entity.Property(t => t.Img).HasMaxLength(200);
+                entity.Property(t => t.CreatedAt).HasConversion(
+                    v => v,
+                    v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
+                );
 
                 //One-to-many relationship with Users
                 entity.HasMany(t => t.Users)

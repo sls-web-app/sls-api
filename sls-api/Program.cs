@@ -19,6 +19,17 @@ builder.Services.AddControllers();
 
 builder.Services.AddAutoMapper(typeof(AdminProfile), typeof(TeamProfile), typeof(TournamentProfile), typeof(GameProfile), typeof(UserProfile));
 
+// Configure CORS for development
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DevelopmentCorsPolicy", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 //PostgresSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("sls-repos"))
@@ -75,7 +86,14 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+// Enable CORS before any other middleware
+app.UseCors("DevelopmentCorsPolicy");
+
+// Remove HTTPS redirection in development when running in Docker
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
