@@ -7,7 +7,8 @@ public class GetTeamDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;
-    public string Adress { get; set; } = null!;
+    public string Short { get; set; } = null!;
+    public string Address { get; set; } = null!;
     public string Img { get; set; } = null!;
 
     public ICollection<GetUserDto> Users { get; set; } = new List<GetUserDto>();

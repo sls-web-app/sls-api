@@ -14,6 +14,7 @@ namespace sls_api.Configuration
             services.AddScoped<IUserRepo, UserRepo>();
             services.AddScoped<IUserInviteRepo, UserInviteRepo>();
             services.AddScoped<IEmailRepo, EmailRepo>();
+            services.AddScoped<IEditionRepo, EditionRepo>();
 
             return services;
         }
