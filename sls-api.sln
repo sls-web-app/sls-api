@@ -15,6 +15,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sls-tests", "sls-tests\sls-
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{2A4C896D-84E3-42C8-8A58-FA6EB9206F38}"
+	ProjectSection(SolutionItems) = preProject
+		..\sls-app\public\logo\sls-logo.svg = ..\sls-app\public\logo\sls-logo.svg
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{3356E855-4C5E-47DA-9B99-A49B596A0CE3}"
+	ProjectSection(SolutionItems) = preProject
+		registration_email.html = registration_email.html
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -100,5 +112,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2A4C896D-84E3-42C8-8A58-FA6EB9206F38} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{3356E855-4C5E-47DA-9B99-A49B596A0CE3} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 EndGlobal
