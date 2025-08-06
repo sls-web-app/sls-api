@@ -71,7 +71,7 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
     /// <response code="401">Returns unauthorized if not authenticated.</response>
     /// <response code="403">Returns forbidden if not authorized as Admin.</response>
     /// <response code="409">Returns conflict if the administrator already exists.</response>
-    [Authorize(Roles = "Admin")]
+    
     [HttpPost("create")]
     [ProducesResponseType<GetAdminDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
