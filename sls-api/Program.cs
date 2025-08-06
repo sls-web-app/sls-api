@@ -17,7 +17,7 @@ builder.Services.AddOpenApi(options =>
 
 builder.Services.AddControllers();
 
-builder.Services.AddAutoMapper(typeof(AdminProfile), typeof(TeamProfile), typeof(TournamentProfile), typeof(GameProfile), typeof(UserProfile));
+builder.Services.AddAutoMapper(typeof(AdminProfile), typeof(TeamProfile), typeof(TournamentProfile), typeof(GameProfile), typeof(UserProfile), typeof(EditionProfile));
 
 // Configure CORS for development
 builder.Services.AddCors(options =>
