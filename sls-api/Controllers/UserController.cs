@@ -17,8 +17,7 @@ namespace sls_api.Controllers;
 public class UserController(
     IUserRepo userRepo,
     ApplicationDbContext dbContext,
-    IMapper mapper,
-    IEmailRepo emailRepo // Add this
+    IMapper mapper
 ) : ControllerBase
 {
     /// <summary>
@@ -101,7 +100,7 @@ public class UserController(
 
         try
         {
-            var createdUser = await userRepo.CreateAsync(dto, emailRepo); // Pass emailRepo
+            var createdUser = await userRepo.CreateAsync(dto); // Pass emailRepo
             return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, mapper.Map<GetUserDto>(createdUser));
         }
         catch (KeyNotFoundException ex)
