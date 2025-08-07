@@ -5,13 +5,14 @@ using sls_borders.Repositories;
 using AutoMapper;
 using sls_borders.DTO.ErrorDto;
 using sls_borders.Models;
+using sls_utils.EmailUtils;
 
 namespace sls_api.Controllers;
 
 [ApiController]
 [Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
-public class UserInviteController(IUserInviteRepo userInviteRepo, ITeamRepo teamRepo, IMapper mapper, IUserRepo userRepo) : ControllerBase
+public class UserInviteController(IUserInviteRepo userInviteRepo, ITeamRepo teamRepo, IMapper mapper, IUserRepo userRepo, IConfiguration configuration) : ControllerBase
 {
     [HttpGet("get-all")]
     public async Task<ActionResult<IEnumerable<InviteUserDto>>> GetAllInvites()
@@ -50,7 +51,14 @@ public class UserInviteController(IUserInviteRepo userInviteRepo, ITeamRepo team
         try
         {
             var createdInvite = await userInviteRepo.CreateAsync(userInvite);
-            // TODO: Send email notification to the invited user
+
+            string DomainName = configuration.GetSection("WebsiteOptions")["DomainName"] ?? "localhost:3000";
+            await EmailUtils.SendRegisterEmailAsync(
+                emailConfig: configuration.GetSection("EmailSettings"),
+                toEmail: userInvite.Email,
+                userName: $"{userInvite.Name} {userInvite.Surname}",
+                PasswordSetupUrl: $"https://${DomainName}/setup-password/{createdInvite.Id}"
+            );
 
             return CreatedAtAction(nameof(GetInviteById), new { id = createdInvite.Id }, createdInvite);
         }
