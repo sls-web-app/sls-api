@@ -407,3 +407,5 @@ FodyWeavers.xsd
 
 # Container files
 .containers
+
+.idea/
