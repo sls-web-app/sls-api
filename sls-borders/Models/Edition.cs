@@ -9,6 +9,7 @@ namespace sls_borders.Models
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
         public string Organizer { get; set; } = null!;
+        public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<Team> Teams { get; set; } = new List<Team>();

@@ -12,6 +12,7 @@ namespace sls_borders.Mappings
 
             CreateMap<CreateEditionDto, Edition>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => false))
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
         }
     }
