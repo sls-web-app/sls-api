@@ -6,7 +6,6 @@ using sls_api.Configuration;
 using sls_borders.Data;
 using sls_borders.Mappings;
 using sls_repos.Data;
-using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 

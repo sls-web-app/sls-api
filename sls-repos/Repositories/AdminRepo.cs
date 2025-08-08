@@ -36,6 +36,7 @@ public class AdminRepo(ApplicationDbContext context, IMapper mapper) : IAdminRep
 
     public async Task<Admin> CreateAsync(CreateAdminDto newAdmin)
     {
+        
         var existingAdmin = await context.Admins
             .FirstOrDefaultAsync(a => a.Username == newAdmin.Username);
 
@@ -49,6 +50,7 @@ public class AdminRepo(ApplicationDbContext context, IMapper mapper) : IAdminRep
         admin.PasswordHash = passwordHash;
         admin.PasswordSalt = passwordSalt;
         context.Admins.Add(admin);
+        
         await context.SaveChangesAsync();
         return admin;
     }

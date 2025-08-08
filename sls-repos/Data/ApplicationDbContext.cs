@@ -12,6 +12,7 @@ namespace sls_borders.Data
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Tournament> Tournaments { get; set; } = null!;
         public DbSet<Game> Games { get; set; } = null!;
+        public DbSet<UserInvite> UserInvites { get; set; } = null!;
         public DbSet<Edition> Editions { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -96,6 +97,16 @@ namespace sls_borders.Data
                     .WithMany(u => u.GamesAsBlack)
                     .HasForeignKey(g => g.BlackPlayerId)
                     .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<UserInvite>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Email).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Surname).IsRequired().HasMaxLength(50);
+
+                entity.HasIndex(e => e.Email).IsUnique();
             });
 
             modelBuilder.Entity<Edition>(entity =>
