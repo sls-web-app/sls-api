@@ -16,7 +16,7 @@ namespace sls_api.Controllers
     [ApiController]
     public class EditionController(IEditionRepo editionRepo, IMapper mapper) : ControllerBase
     {
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpGet("get-all")]
         [ProducesResponseType<IEnumerable<GetEditionDto>>(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -27,6 +27,7 @@ namespace sls_api.Controllers
             return Ok(mapper.Map<List<GetEditionDto>>(editions));
         }
 
+        //[Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         [ProducesResponseType<GetEditionDto>(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -36,7 +37,7 @@ namespace sls_api.Controllers
             return Ok(mapper.Map<GetEditionDto>(edition));
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost("create")]
         [ProducesResponseType<GetEditionDto>(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

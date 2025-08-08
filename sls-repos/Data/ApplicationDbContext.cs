@@ -113,6 +113,14 @@ namespace sls_borders.Data
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Number).IsRequired();
+                entity.Property(e => e.Color)
+                    .IsRequired()
+                    .HasMaxLength(7) // Hex color code length
+                    .HasConversion(
+                        v => v,
+                        v => v.StartsWith("#") ? v : "#" + v // Ensure it starts with '#'
+                    );
+                entity.Property(e => e.IsActive).IsRequired().HasDefaultValue(false);
                 entity.Property(e => e.StartDate)
                     .HasColumnType("date");
                 entity.Property(e => e.EndDate)

@@ -7,5 +7,6 @@
         public string Color { get; set; } = null!; // Hex color code
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
+        public bool IsActive { get; set; }
     }
 }
