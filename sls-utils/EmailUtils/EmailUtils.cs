@@ -50,7 +50,7 @@ public class EmailUtils
     public static async Task SendRegisterEmailAsync(IConfigurationSection emailConfig, string toEmail, string userName, string PasswordSetupUrl)
     {
         string subject = "SLS Registration";
-        string body = await File.ReadAllTextAsync("Templates/registration_email.html");
+        string body = await File.ReadAllTextAsync("EmailTemplates/registration_email.html");
         body = body.Replace("{{UserName}}", userName).Replace("{{PasswordSetupUrl}}", PasswordSetupUrl);
         await SendEmailAsync(emailConfig, toEmail, subject, body);
     }

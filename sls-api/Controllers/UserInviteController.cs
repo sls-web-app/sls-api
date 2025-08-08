@@ -57,7 +57,7 @@ public class UserInviteController(IUserInviteRepo userInviteRepo, ITeamRepo team
                 emailConfig: configuration.GetSection("EmailSettings"),
                 toEmail: userInvite.Email,
                 userName: $"{userInvite.Name} {userInvite.Surname}",
-                PasswordSetupUrl: $"https://${DomainName}/setup-password/{createdInvite.Id}"
+                PasswordSetupUrl: $"https://{DomainName}/setup-password/{createdInvite.Id}"
             );
 
             return CreatedAtAction(nameof(GetInviteById), new { id = createdInvite.Id }, createdInvite);
