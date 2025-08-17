@@ -13,6 +13,7 @@ namespace sls_borders.Models
         public string Surname { get; set; } = null!;
         public string? ClassName { get; set; }
         public Role Role { get; set; } = Role.User;
+        public bool AccountActivated { get; set; } = false;
 
         public Guid TeamId { get; set; } = Guid.Empty;
         public Team Team { get; set; } = null!;

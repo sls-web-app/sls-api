@@ -105,6 +105,7 @@ namespace sls_borders.Data
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(50);
                 entity.Property(e => e.Surname).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.UserId).IsRequired();
 
                 entity.HasIndex(e => e.Email).IsUnique();
             });
