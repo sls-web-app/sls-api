@@ -105,6 +105,8 @@ public class UserInviteController(IUserInviteRepo userInviteRepo, ITeamRepo team
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
+        if(registerDto.Password == "")
+            return BadRequest(new ErrorResponse { Message = "Password cannot be empty" });
 
         var invite = await userInviteRepo.GetByIdAsync(inviteId);
         if (invite == null)
@@ -112,7 +114,7 @@ public class UserInviteController(IUserInviteRepo userInviteRepo, ITeamRepo team
 
         var user = await userRepo.RegisterAsync(invite.UserId, registerDto.Password);
         var keyString = configuration["Jwt:Key"] ?? throw new ArgumentNullException("JWT key is not configured.");
-        string token = JwtUtils.GenerateJwtToken(user.Id, user.Email, user.Role, keyString);
+        string token = JwtUtils.GenerateJwtToken(user.Id, user.Name, user.Role, keyString);
 
         await userInviteRepo.DeleteAsync(inviteId);
         return Ok(new LoginUserResponseDto { Token = token });
