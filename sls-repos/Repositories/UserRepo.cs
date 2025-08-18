@@ -24,7 +24,6 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
     public async Task<List<User>> GetAllAsync()
     {
         return await context.Users
-            .Include(u => u.Team)
             .Include(u => u.GamesAsWhite)
             .Include(u => u.GamesAsBlack)
             .ToListAsync();
@@ -33,7 +32,6 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
     public async Task<User?> GetByIdAsync(Guid id)
     {
         return await context.Users
-            .Include(u => u.Team)
             .Include(u => u.GamesAsWhite)
             .Include(u => u.GamesAsBlack)
             .FirstOrDefaultAsync(u => u.Id == id);
@@ -42,14 +40,6 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
     public async Task<User> CreateAsync(CreateUserDto createUserDto)
     {
         var user = mapper.Map<User>(createUserDto);
-
-        if (createUserDto.TeamId != Guid.Empty)
-        {
-            var team = await context.Teams.FindAsync(createUserDto.TeamId);
-            if (team == null)
-                throw new KeyNotFoundException($"Team with ID {createUserDto.TeamId} was not found.");
-            user.Team = team;
-        }
 
         (string passwordHash, string passwordSalt) = HashingUtils.HashPassword(createUserDto.Password);
         user.PasswordHash = passwordHash;
@@ -60,7 +50,6 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
 
         // Reload the user with related data
         return await context.Users
-            .Include(u => u.Team)
             .Include(u => u.GamesAsWhite)
             .Include(u => u.GamesAsBlack)
             .FirstAsync(u => u.Id == user.Id);
@@ -115,7 +104,6 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
     public async Task<User?> GetByEmailAsync(string email)
     {
         return await context.Users
-            .Include(u => u.Team)
             .Include(u => u.GamesAsWhite)
             .Include(u => u.GamesAsBlack)
             .FirstOrDefaultAsync(u => u.Email == email);

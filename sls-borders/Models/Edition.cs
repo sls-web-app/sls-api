@@ -12,7 +12,7 @@ namespace sls_borders.Models
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public ICollection<Team> Teams { get; set; } = new List<Team>();
+        public ICollection<EditionTeamMember> EditionTeamMembers { get; set; } = new List<EditionTeamMember>();
         public ICollection<Tournament> Tournaments { get; set; } = new List<Tournament>();
     }
 }

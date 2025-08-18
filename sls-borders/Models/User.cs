@@ -14,9 +14,9 @@ namespace sls_borders.Models
         public string? ClassName { get; set; }
         public Role Role { get; set; } = Role.User;
 
-        public Guid TeamId { get; set; } = Guid.Empty;
-        public Team Team { get; set; } = null!;
         public ICollection<Game> GamesAsWhite { get; set; } = new List<Game>();
         public ICollection<Game> GamesAsBlack { get; set; } = new List<Game>();
+
+        public ICollection<EditionTeamMember> EditionTeamMembers { get; set; } = new List<EditionTeamMember>();
     }
 }
