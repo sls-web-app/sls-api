@@ -15,9 +15,9 @@ namespace sls_borders.Models
         public Role Role { get; set; } = Role.User;
         public bool AccountActivated { get; set; } = false;
 
-        public Guid TeamId { get; set; } = Guid.Empty;
-        public Team Team { get; set; } = null!;
         public ICollection<Game> GamesAsWhite { get; set; } = new List<Game>();
         public ICollection<Game> GamesAsBlack { get; set; } = new List<Game>();
+
+        public ICollection<EditionTeamMember> EditionTeamMembers { get; set; } = new List<EditionTeamMember>();
     }
 }

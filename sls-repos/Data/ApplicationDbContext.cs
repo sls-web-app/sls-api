@@ -7,13 +7,14 @@ namespace sls_borders.Data
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-        public DbSet<Admin> Admins { get; set; } = null!;
-        public DbSet<Team> Teams { get; set; } = null!;
-        public DbSet<User> Users { get; set; } = null!;
-        public DbSet<Tournament> Tournaments { get; set; } = null!;
-        public DbSet<Game> Games { get; set; } = null!;
-        public DbSet<UserInvite> UserInvites { get; set; } = null!;
-        public DbSet<Edition> Editions { get; set; } = null!;
+        public DbSet<Admin> Admins { get; set; } = default!;
+        public DbSet<Team> Teams { get; set; } = default!;
+        public DbSet<User> Users { get; set; } = default!;
+        public DbSet<Tournament> Tournaments { get; set; } = default!;
+        public DbSet<Game> Games { get; set; } = default!;
+        public DbSet<UserInvite> UserInvites { get; set; } = default!;
+        public DbSet<Edition> Editions { get; set; } = default!;
+        public DbSet<EditionTeamMember> EditionTeamMembers { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -39,21 +40,6 @@ namespace sls_borders.Data
                     v => v,
                     v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
                 );
-
-                //One-to-many relationship with Users
-                entity.HasMany(t => t.Users)
-                    .WithOne(u => u.Team)
-                    .HasForeignKey(u => u.TeamId)
-                    .OnDelete(DeleteBehavior.SetNull);
-
-                entity.HasMany(t => t.OrganizedTournaments)
-                    .WithOne(t => t.OrganizingTeam)
-                    .HasForeignKey(t => t.OrganizingTeamId)
-                    .OnDelete(DeleteBehavior.SetNull);
-
-                entity.HasMany(t => t.Tournaments)
-                    .WithMany(t => t.Teams)
-                    .UsingEntity(j => j.ToTable("TeamTournaments"));
             });
 
             modelBuilder.Entity<User>(entity =>
@@ -127,16 +113,32 @@ namespace sls_borders.Data
                     v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
                 );
 
-                //One-to-many relationship with Teams
-                entity.HasMany(e => e.Teams)
-                    .WithOne(t => t.Edition)
-                    .HasForeignKey(t => t.EditionId)
-                    .OnDelete(DeleteBehavior.SetNull);
                 //One-to-many relationship with Tournaments
                 entity.HasMany(e => e.Tournaments)
                     .WithOne(t => t.Edition)
                     .HasForeignKey(t => t.EditionId)
                     .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // EditionTeamMember
+            modelBuilder.Entity<EditionTeamMember>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.Edition)
+                      .WithMany(e => e.EditionTeamMembers)
+                      .HasForeignKey(e => e.EditionId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Team)
+                      .WithMany(t => t.EditionTeamMembers)
+                      .HasForeignKey(e => e.TeamId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.User)
+                      .WithMany(u => u.EditionTeamMembers)
+                      .HasForeignKey(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             base.OnModelCreating(modelBuilder);

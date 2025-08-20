@@ -12,8 +12,8 @@ using sls_borders.Data;
 namespace sls_repos.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250805165249_TeamTableAddCreateDate")]
-    partial class TeamTableAddCreateDate
+    [Migration("20250820115854_TeamImgNullableColumn")]
+    partial class TeamImgNullableColumn
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,21 +24,6 @@ namespace sls_repos.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("TeamTournament", b =>
-                {
-                    b.Property<Guid>("TeamsId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("TournamentsId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("TeamsId", "TournamentsId");
-
-                    b.HasIndex("TournamentsId");
-
-                    b.ToTable("TeamTournaments", (string)null);
-                });
 
             modelBuilder.Entity("sls_borders.Models.Admin", b =>
                 {
@@ -65,6 +50,70 @@ namespace sls_repos.Migrations
                         .IsUnique();
 
                     b.ToTable("Admins");
+                });
+
+            modelBuilder.Entity("sls_borders.Models.Edition", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("Number")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Organizer")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Editions");
+                });
+
+            modelBuilder.Entity("sls_borders.Models.EditionTeamMember", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EditionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EditionId");
+
+                    b.HasIndex("TeamId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("EditionTeamMembers");
                 });
 
             modelBuilder.Entity("sls_borders.Models.Game", b =>
@@ -114,7 +163,6 @@ namespace sls_repos.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Img")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
@@ -142,7 +190,7 @@ namespace sls_repos.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("OrganizingTeamId")
+                    b.Property<Guid>("EditionId")
                         .HasColumnType("uuid");
 
                     b.Property<int?>("Round")
@@ -153,7 +201,7 @@ namespace sls_repos.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrganizingTeamId");
+                    b.HasIndex("EditionId");
 
                     b.ToTable("Tournaments");
                 });
@@ -199,6 +247,38 @@ namespace sls_repos.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("sls_borders.Models.UserInvite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Surname")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<Guid>("TeamId")
                         .HasColumnType("uuid");
 
@@ -207,24 +287,34 @@ namespace sls_repos.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.HasIndex("TeamId");
-
-                    b.ToTable("Users");
+                    b.ToTable("UserInvites");
                 });
 
-            modelBuilder.Entity("TeamTournament", b =>
+            modelBuilder.Entity("sls_borders.Models.EditionTeamMember", b =>
                 {
-                    b.HasOne("sls_borders.Models.Team", null)
-                        .WithMany()
-                        .HasForeignKey("TeamsId")
+                    b.HasOne("sls_borders.Models.Edition", "Edition")
+                        .WithMany("EditionTeamMembers")
+                        .HasForeignKey("EditionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("sls_borders.Models.Tournament", null)
-                        .WithMany()
-                        .HasForeignKey("TournamentsId")
+                    b.HasOne("sls_borders.Models.Team", "Team")
+                        .WithMany("EditionTeamMembers")
+                        .HasForeignKey("TeamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("sls_borders.Models.User", "User")
+                        .WithMany("EditionTeamMembers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Edition");
+
+                    b.Navigation("Team");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("sls_borders.Models.Game", b =>
@@ -252,31 +342,25 @@ namespace sls_repos.Migrations
 
             modelBuilder.Entity("sls_borders.Models.Tournament", b =>
                 {
-                    b.HasOne("sls_borders.Models.Team", "OrganizingTeam")
-                        .WithMany("OrganizedTournaments")
-                        .HasForeignKey("OrganizingTeamId")
+                    b.HasOne("sls_borders.Models.Edition", "Edition")
+                        .WithMany("Tournaments")
+                        .HasForeignKey("EditionId")
                         .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
 
-                    b.Navigation("OrganizingTeam");
+                    b.Navigation("Edition");
                 });
 
-            modelBuilder.Entity("sls_borders.Models.User", b =>
+            modelBuilder.Entity("sls_borders.Models.Edition", b =>
                 {
-                    b.HasOne("sls_borders.Models.Team", "Team")
-                        .WithMany("Users")
-                        .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                    b.Navigation("EditionTeamMembers");
 
-                    b.Navigation("Team");
+                    b.Navigation("Tournaments");
                 });
 
             modelBuilder.Entity("sls_borders.Models.Team", b =>
                 {
-                    b.Navigation("OrganizedTournaments");
-
-                    b.Navigation("Users");
+                    b.Navigation("EditionTeamMembers");
                 });
 
             modelBuilder.Entity("sls_borders.Models.Tournament", b =>
@@ -286,6 +370,8 @@ namespace sls_repos.Migrations
 
             modelBuilder.Entity("sls_borders.Models.User", b =>
                 {
+                    b.Navigation("EditionTeamMembers");
+
                     b.Navigation("GamesAsBlack");
 
                     b.Navigation("GamesAsWhite");

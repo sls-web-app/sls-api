@@ -12,8 +12,6 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
     public async Task<List<Tournament>> GetAllAsync()
     {
         return await context.Tournaments
-            .Include(t => t.OrganizingTeam)
-            .Include(t => t.Teams)
             .Include(t => t.Games)
             .ToListAsync();
     }
@@ -21,8 +19,6 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
     public async Task<Tournament?> GetByIdAsync(Guid id)
     {
         return await context.Tournaments
-            .Include(t => t.OrganizingTeam)
-            .Include(t => t.Teams)
             .Include(t => t.Games)
             .FirstOrDefaultAsync(t => t.Id == id);
     }
@@ -34,13 +30,6 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
         // **FIX: Specify that the incoming date is UTC**
         tournament.Date = DateTime.SpecifyKind(tournament.Date, DateTimeKind.Utc);
 
-        var organizingTeam = await context.Teams.FindAsync(createDto.OrganizingTeamId);
-        if (organizingTeam == null)
-        {
-            throw new KeyNotFoundException($"The team with ID {createDto.OrganizingTeamId} was not found.");
-        }
-        tournament.OrganizingTeam = organizingTeam;
-
         context.Tournaments.Add(tournament);
         await context.SaveChangesAsync();
 
@@ -49,9 +38,7 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
 
     public async Task<Tournament?> UpdateAsync(Guid id, UpdateTournamentDto updateDto)
     {
-        var existingTournament = await context.Tournaments
-            .Include(t => t.OrganizingTeam)
-            .FirstOrDefaultAsync(t => t.Id == id);
+        var existingTournament = await context.Tournaments.FindAsync(id);
 
         if (existingTournament == null)
             return null;
@@ -60,16 +47,6 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
 
         // **FIX: Specify that the updated date is UTC**
         existingTournament.Date = DateTime.SpecifyKind(existingTournament.Date, DateTimeKind.Utc);
-
-        if (existingTournament.OrganizingTeamId != updateDto.OrganizingTeamId)
-        {
-            var newOrganizingTeam = await context.Teams.FindAsync(updateDto.OrganizingTeamId);
-            if (newOrganizingTeam == null)
-            {
-                throw new KeyNotFoundException($"The team with ID {updateDto.OrganizingTeamId} was not found.");
-            }
-            existingTournament.OrganizingTeam = newOrganizingTeam;
-        }
 
         await context.SaveChangesAsync();
         return existingTournament;

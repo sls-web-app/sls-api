@@ -3,6 +3,7 @@ using sls_borders.DTO.Team;
 using sls_borders.Repositories;
 using AutoMapper;
 using sls_borders.DTO.ErrorDto;
+using sls_borders.Enums;
 
 namespace sls_api.Controllers;
 
@@ -12,7 +13,7 @@ namespace sls_api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class TeamController(ITeamRepo teamRepo, IMapper mapper) : ControllerBase
+public class TeamController(ITeamRepo teamRepo, IMapper mapper, IImageService imageService) : ControllerBase
 {
     /// <summary>
     /// Retrieves all teams from the system.
@@ -74,16 +75,37 @@ public class TeamController(ITeamRepo teamRepo, IMapper mapper) : ControllerBase
     /// Creates a new team in the system.
     /// </summary>
     /// <param name="dto">The team data for creation.</param>
+    /// <param name="avatar">The team avatar image file (optional).</param>
     /// <returns>The created team or validation errors.</returns>
     /// <response code="201">Returns the newly created team.</response>
     /// <response code="400">Returns validation errors if the request model is invalid.</response>
     [HttpPost("create")]
+    [Consumes("multipart/form-data")]
     [ProducesResponseType<GetTeamDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateTeam([FromBody] CreateTeamDto dto)
+    public async Task<IActionResult> CreateTeam([FromForm] CreateTeamDto dto, [FromForm] IFormFile? avatar)
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
+
+        // Handle avatar upload if provided
+        if (avatar != null)
+        {
+            using var stream = avatar.OpenReadStream();
+            var uploadResult = await imageService.UploadImageAsync(
+                stream, 
+                avatar.FileName, 
+                avatar.ContentType, 
+                ImageCategory.Avatar);
+
+            if (!uploadResult.Success)
+            {
+                return BadRequest(new ErrorResponse { Message = uploadResult.ErrorMessage ?? "Failed to upload avatar" });
+            }
+
+            // Set the image URL in the DTO
+            dto.Img = uploadResult.ImageUrl;
+        }
 
         var createdTeam = await teamRepo.CreateAsync(dto);
         return CreatedAtAction(nameof(GetTeamById), new { id = createdTeam.Id }, mapper.Map<GetTeamDto>(createdTeam));

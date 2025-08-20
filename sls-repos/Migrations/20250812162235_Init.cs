@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace sls_repos.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -26,13 +26,33 @@ namespace sls_repos.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Editions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Number = table.Column<int>(type: "integer", nullable: false),
+                    Color = table.Column<string>(type: "character varying(7)", maxLength: 7, nullable: false),
+                    StartDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    EndDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    Organizer = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Editions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Teams",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Adress = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Img = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false)
+                    Short = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    Address = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Img = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -40,24 +60,19 @@ namespace sls_repos.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tournaments",
+                name: "UserInvites",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Round = table.Column<int>(type: "integer", nullable: true),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    OrganizingTeamId = table.Column<Guid>(type: "uuid", nullable: false)
+                    Email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Surname = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Role = table.Column<int>(type: "integer", nullable: false),
+                    TeamId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Tournaments", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Tournaments_Teams_OrganizingTeamId",
-                        column: x => x.OrganizingTeamId,
-                        principalTable: "Teams",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                    table.PrimaryKey("PK_UserInvites", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -72,40 +87,62 @@ namespace sls_repos.Migrations
                     Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Surname = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     ClassName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    Role = table.Column<int>(type: "integer", nullable: false),
-                    TeamId = table.Column<Guid>(type: "uuid", nullable: false)
+                    Role = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tournaments",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Round = table.Column<int>(type: "integer", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    EditionId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tournaments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Users_Teams_TeamId",
-                        column: x => x.TeamId,
-                        principalTable: "Teams",
+                        name: "FK_Tournaments_Editions_EditionId",
+                        column: x => x.EditionId,
+                        principalTable: "Editions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
-                name: "TeamTournaments",
+                name: "EditionTeamMembers",
                 columns: table => new
                 {
-                    TeamsId = table.Column<Guid>(type: "uuid", nullable: false),
-                    TournamentsId = table.Column<Guid>(type: "uuid", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    EditionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TeamId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TeamTournaments", x => new { x.TeamsId, x.TournamentsId });
+                    table.PrimaryKey("PK_EditionTeamMembers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TeamTournaments_Teams_TeamsId",
-                        column: x => x.TeamsId,
+                        name: "FK_EditionTeamMembers_Editions_EditionId",
+                        column: x => x.EditionId,
+                        principalTable: "Editions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_EditionTeamMembers_Teams_TeamId",
+                        column: x => x.TeamId,
                         principalTable: "Teams",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TeamTournaments_Tournaments_TournamentsId",
-                        column: x => x.TournamentsId,
-                        principalTable: "Tournaments",
+                        name: "FK_EditionTeamMembers_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -151,6 +188,21 @@ namespace sls_repos.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_EditionTeamMembers_EditionId",
+                table: "EditionTeamMembers",
+                column: "EditionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EditionTeamMembers_TeamId",
+                table: "EditionTeamMembers",
+                column: "TeamId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EditionTeamMembers_UserId",
+                table: "EditionTeamMembers",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Games_BlackPlayerId",
                 table: "Games",
                 column: "BlackPlayerId");
@@ -166,25 +218,21 @@ namespace sls_repos.Migrations
                 column: "WhitePlayerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TeamTournaments_TournamentsId",
-                table: "TeamTournaments",
-                column: "TournamentsId");
+                name: "IX_Tournaments_EditionId",
+                table: "Tournaments",
+                column: "EditionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tournaments_OrganizingTeamId",
-                table: "Tournaments",
-                column: "OrganizingTeamId");
+                name: "IX_UserInvites_Email",
+                table: "UserInvites",
+                column: "Email",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_Email",
                 table: "Users",
                 column: "Email",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_TeamId",
-                table: "Users",
-                column: "TeamId");
         }
 
         /// <inheritdoc />
@@ -194,19 +242,25 @@ namespace sls_repos.Migrations
                 name: "Admins");
 
             migrationBuilder.DropTable(
+                name: "EditionTeamMembers");
+
+            migrationBuilder.DropTable(
                 name: "Games");
 
             migrationBuilder.DropTable(
-                name: "TeamTournaments");
+                name: "UserInvites");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Teams");
 
             migrationBuilder.DropTable(
                 name: "Tournaments");
 
             migrationBuilder.DropTable(
-                name: "Teams");
+                name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Editions");
         }
     }
 }
