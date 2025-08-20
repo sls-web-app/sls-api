@@ -5,7 +5,9 @@ using Scalar.AspNetCore;
 using sls_api.Configuration;
 using sls_borders.Data;
 using sls_borders.Mappings;
+using sls_borders.Repositories;
 using sls_repos.Data;
+using sls_utils.ImageUtils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +36,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("sls-repos"))
 );
 
+builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddRepositories();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -87,6 +90,19 @@ if (app.Environment.IsDevelopment())
 
 // Enable CORS before any other middleware
 app.UseCors("DevelopmentCorsPolicy");
+
+// Configure static files serving for uploaded images
+var uploadsPathConfig = builder.Configuration["ImageUpload:Path"];
+var uploadsPath = Path.IsPathRooted(uploadsPathConfig)
+    ? uploadsPathConfig
+    : Path.Combine(Directory.GetCurrentDirectory(), uploadsPathConfig);
+Directory.CreateDirectory(uploadsPath);
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploadsPath),
+    RequestPath = "/uploads"
+});
 
 // Remove HTTPS redirection in development when running in Docker
 if (!app.Environment.IsDevelopment())

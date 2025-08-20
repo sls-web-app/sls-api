@@ -1,13 +1,17 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace sls_borders.DTO.Team;
 
+/// <summary>
+/// DTO do tworzenia nowego zespo�u.
+/// </summary>
 public class CreateTeamDto
 {
     public string Name { get; set; } = null!;
-    public string Short { get; set; } = null!;
-    public string Address { get; set; } = null!;
-    public string Img { get; set; } = null!;
-    public Guid EditionId { get; set; } = Guid.Empty;
 
-    // Initialize with an empty list to prevent null reference issues.
-    public ICollection<Guid> TournamentsId { get; set; } = new List<Guid>();
+    public string Short { get; set; } = null!;
+
+    public string Address { get; set; } = null!;
+
+    public string? Img { get; set; }
 }

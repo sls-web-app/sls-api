@@ -16,7 +16,7 @@ namespace sls_repos.Data
             if (!await context.Admins.AnyAsync(ad => ad.Username == "admin"))
             {
                 string Username = "admin";
-                string Password = "Admin123!"; // Replace with a secure password
+                string Password = "Admin123!@#$"; // Replace with a secure password
 
                 (string passwordHash, string passwordSalt) = HashingUtils.HashPassword(Password);
 

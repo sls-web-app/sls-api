@@ -15,10 +15,11 @@ namespace sls_borders.Mappings
             CreateMap<Team, GetTeamTournamentsDto>();
 
             // Maps from CreateTeamDto to the Team entity.
-            // The repository is responsible for handling relationships, so we ignore them here.
+            // The repository is responsible for handling relationships and image, so we ignore them here.
             CreateMap<CreateTeamDto, Team>()
-                .ForMember(dest => dest.EditionTeamMembers, opt => opt.Ignore());
-
+                .ForMember(dest => dest.EditionTeamMembers, opt => opt.Ignore())
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
 
             // Maps from UpdateTeamDto to the Team entity.
             // The repository should also handle updating relationships.
