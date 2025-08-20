@@ -48,6 +48,9 @@ public class AuthController(IAdminRepo adminRepo, IUserRepo userRepo, IConfigura
     {
         if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
+        if(dto.Password == string.Empty)
+            return BadRequest(new ErrorResponse { Message = "Password cannot be empty" });
+
         User? user = await userRepo.LoginAsync(dto.Email, dto.Password);
         if (user == null) return Unauthorized(new ErrorResponse { Message = "Invalid email or password" });
 

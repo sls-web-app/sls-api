@@ -7,6 +7,7 @@ using sls_borders.Repositories;
 using sls_utils.AuthUtils;
 
 namespace sls_repos.Repositories;
+
 public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
 {
     public async Task<User?> LoginAsync(string email, string password)
@@ -72,7 +73,7 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
 
         if (existingUser == null) return null;
 
-        if(existingUser.Email != updateUserDto.Email)
+        if (existingUser.Email != updateUserDto.Email)
         {
             var emailExists = await EmailExistsAsync(updateUserDto.Email);
             if (emailExists)
@@ -119,6 +120,24 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
             .Include(u => u.GamesAsWhite)
             .Include(u => u.GamesAsBlack)
             .FirstOrDefaultAsync(u => u.Email == email);
+    }
+    
+    public async Task<User> RegisterAsync(Guid userId, string password)
+    {
+        var user = await GetByIdAsync(userId);
+        if (user == null)
+            throw new KeyNotFoundException($"User with ID {userId} was not found.");
+
+        (string passwordHash, string passwordSalt) = HashingUtils.HashPassword(password);
+        user.PasswordHash = passwordHash;
+        user.PasswordSalt = passwordSalt;
+
+        user.AccountActivated = true;
+
+        context.Users.Update(user);
+        await context.SaveChangesAsync();
+
+        return user;
     }
 }
 

@@ -6,6 +6,8 @@ using AutoMapper;
 using sls_borders.DTO.ErrorDto;
 using sls_borders.Models;
 using sls_utils.EmailUtils;
+using sls_borders.Enums;
+using sls_utils.AuthUtils;
 
 namespace sls_api.Controllers;
 
@@ -37,26 +39,41 @@ public class UserInviteController(IUserInviteRepo userInviteRepo, ITeamRepo team
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
 
-        var userInvite = mapper.Map<UserInvite>(inviteDto);
+        if (await userRepo.EmailExistsAsync(inviteDto.Email))
+            return Conflict(new ErrorResponse { Message = $"User with email {inviteDto.Email} already exists" });
 
-        if (await userRepo.EmailExistsAsync(userInvite.Email))
-            return Conflict(new ErrorResponse { Message = $"User with email {userInvite.Email} already exists" });
-
-        if (await userInviteRepo.EmailExistsAsync(userInvite.Email))
-            return Conflict(new ErrorResponse { Message = $"User invite with email {userInvite.Email} already exists" });
-
-        if (await teamRepo.GetByIdAsync(userInvite.TeamId) == null)
-            return NotFound(new ErrorResponse { Message = $"Team with ID {userInvite.TeamId} not found" });
+        if (await teamRepo.GetByIdAsync(inviteDto.TeamId) == null)
+            return NotFound(new ErrorResponse { Message = $"Team with ID {inviteDto.TeamId} not found" });
 
         try
         {
+            var succeeded = Enum.TryParse(inviteDto.Role, out Role role);
+            if (!succeeded) return BadRequest(new ErrorResponse { Message = $"Invalid role: {inviteDto.Role}" });
+
+            var createdUser = await userRepo.CreateAsync(new CreateUserDto
+            {
+                Email = inviteDto.Email,
+                Name = inviteDto.Name,
+                Surname = inviteDto.Surname,
+                Role = role,
+                TeamId = inviteDto.TeamId,
+                Password = string.Empty, // Password will be set up later
+                ProfileImg = string.Empty
+            });
+
+            var userInvite = new UserInvite
+            {
+                Id = Guid.NewGuid(),
+                UserId = createdUser.Id,
+            };
+
             var createdInvite = await userInviteRepo.CreateAsync(userInvite);
 
             string DomainName = configuration.GetSection("WebsiteOptions")["DomainName"] ?? "localhost:3000";
             await EmailUtils.SendRegisterEmailAsync(
                 emailConfig: configuration.GetSection("EmailSettings"),
-                toEmail: userInvite.Email,
-                userName: $"{userInvite.Name} {userInvite.Surname}",
+                toEmail: createdUser.Email,
+                userName: $"{createdUser.Name} {createdUser.Surname}",
                 PasswordSetupUrl: $"https://{DomainName}/setup-password/{createdInvite.Id}"
             );
 
@@ -70,6 +87,12 @@ public class UserInviteController(IUserInviteRepo userInviteRepo, ITeamRepo team
     [HttpDelete("delete/{id:guid}")]
     public async Task<ActionResult> DeleteInvite(Guid id)
     {
+        var invite = await userInviteRepo.GetByIdAsync(id);
+        if (invite == null)
+            return NotFound(new ErrorResponse { Message = $"Invite with ID {id} not found" });
+
+        await userRepo.DeleteAsync(invite.UserId);
+
         var deleted = await userInviteRepo.DeleteAsync(id);
         if (!deleted)
             return NotFound(new ErrorResponse { Message = $"Invite with ID {id} not found" });
@@ -82,38 +105,18 @@ public class UserInviteController(IUserInviteRepo userInviteRepo, ITeamRepo team
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
+        if(registerDto.Password == "")
+            return BadRequest(new ErrorResponse { Message = "Password cannot be empty" });
 
         var invite = await userInviteRepo.GetByIdAsync(inviteId);
         if (invite == null)
             return NotFound(new ErrorResponse { Message = $"Invite with ID {inviteId} not found" });
 
-        if (await userRepo.EmailExistsAsync(invite.Email))
-            return Conflict(new ErrorResponse { Message = $"User with email {invite.Email} already exists" });
+        var user = await userRepo.RegisterAsync(invite.UserId, registerDto.Password);
+        var keyString = configuration["Jwt:Key"] ?? throw new ArgumentNullException("JWT key is not configured.");
+        string token = JwtUtils.GenerateJwtToken(user.Id, user.Name, user.Role, keyString);
 
-        var user = new CreateUserDto
-        {
-            Email = invite.Email,
-            Name = invite.Name,
-            Surname = invite.Surname,
-            Role = invite.Role,
-            TeamId = invite.TeamId,
-            Password = registerDto.Password,
-            ProfileImg = string.Empty
-        };
-        try
-        {
-            var createdUser = await userRepo.CreateAsync(user);
-            await userInviteRepo.DeleteAsync(inviteId);
-            return CreatedAtAction(
-                "GetUserById", 
-                "User",        
-                new { id = createdUser.Id }, 
-                mapper.Map<GetUserDto>(createdUser)
-            );
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new ErrorResponse { Message = ex.Message });
-        }
+        await userInviteRepo.DeleteAsync(inviteId);
+        return Ok(new LoginUserResponseDto { Token = token });
     }
 }

@@ -33,9 +33,4 @@ public class UserInviteRepo(ApplicationDbContext context) : IUserInviteRepo
         await context.SaveChangesAsync();
         return true;
     }
-
-    public async Task<bool> EmailExistsAsync(string email)
-    {
-        return await context.UserInvites.AnyAsync(ui => ui.Email == email);
-    }   
 }

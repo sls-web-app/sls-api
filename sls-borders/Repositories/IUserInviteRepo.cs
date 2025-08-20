@@ -10,6 +10,5 @@ namespace sls_borders.Repositories
         // Task<UserInvite?> UpdateAsync(Guid id, UserInvite userInvite);
         Task<bool> DeleteAsync(Guid id);
 
-        Task<bool> EmailExistsAsync(string email);
     }
 }
