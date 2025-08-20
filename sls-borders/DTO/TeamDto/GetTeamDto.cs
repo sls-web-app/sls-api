@@ -10,7 +10,6 @@ public class GetTeamDto
     public string Short { get; set; } = null!;
     public string Address { get; set; } = null!;
     public string Img { get; set; } = null!;
-    public Guid EditionId { get; set; } = Guid.Empty;
 
     public ICollection<GetUserDto> Users { get; set; } = new List<GetUserDto>();
 

@@ -6,8 +6,6 @@ public class UpdateTeamDto
     public string Short { get; set; } = null!;
     public string Address { get; set; } = null!;
     public string Img { get; set; } = null!;
-    public Guid EditionId { get; set; } = Guid.Empty;
 
     public ICollection<Guid> UsersId { get; set; } = new List<Guid>();
-    public ICollection<Guid> TournamentsId { get; set; } = new List<Guid>();
 }
