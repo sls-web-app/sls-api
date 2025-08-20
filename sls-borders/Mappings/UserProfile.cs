@@ -1,6 +1,7 @@
 using AutoMapper;
 using sls_borders.DTO.UserDto;
 using sls_borders.Models;
+using sls_borders.Enums;
 using System.Security.Cryptography;
 using System.Text;
 

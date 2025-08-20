@@ -10,6 +10,6 @@ public class CreateUserDto
     public string Name { get; set; } = null!;
     public string Surname { get; set; } = null!;
     public string? ClassName { get; set; }
-    public Role Role { get; set; } = Role.User;
+    public Role Role { get; set; } = Role.user;
     public Guid TeamId { get; set; } = Guid.Empty;
 }

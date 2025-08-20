@@ -42,12 +42,9 @@ public class UserInviteController(IUserInviteRepo userInviteRepo, ITeamRepo team
         if (await userRepo.EmailExistsAsync(inviteDto.Email))
             return Conflict(new ErrorResponse { Message = $"User with email {inviteDto.Email} already exists" });
 
-        if (await teamRepo.GetByIdAsync(inviteDto.TeamId) == null)
-            return NotFound(new ErrorResponse { Message = $"Team with ID {inviteDto.TeamId} not found" });
-
         try
         {
-            var succeeded = Enum.TryParse(inviteDto.Role, out Role role);
+            var succeeded = Enum.TryParse(inviteDto.Role.ToLower(), out Role role);
             if (!succeeded) return BadRequest(new ErrorResponse { Message = $"Invalid role: {inviteDto.Role}" });
 
             var createdUser = await userRepo.CreateAsync(new CreateUserDto
@@ -56,7 +53,6 @@ public class UserInviteController(IUserInviteRepo userInviteRepo, ITeamRepo team
                 Name = inviteDto.Name,
                 Surname = inviteDto.Surname,
                 Role = role,
-                TeamId = inviteDto.TeamId,
                 Password = string.Empty, // Password will be set up later
                 ProfileImg = string.Empty
             });

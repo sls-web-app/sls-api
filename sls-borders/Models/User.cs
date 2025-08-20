@@ -12,7 +12,7 @@ namespace sls_borders.Models
         public string Name { get; set; } = null!;
         public string Surname { get; set; } = null!;
         public string? ClassName { get; set; }
-        public Role Role { get; set; } = Role.User;
+        public Role Role { get; set; } = Role.user;
         public bool AccountActivated { get; set; } = false;
 
         public ICollection<Game> GamesAsWhite { get; set; } = new List<Game>();
