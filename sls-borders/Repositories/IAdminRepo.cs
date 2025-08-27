@@ -1,4 +1,4 @@
-using sls_borders.DTO.Admin;
+using sls_borders.DTO.AdminDto;
 using sls_borders.Models;
 
 namespace sls_borders.Repositories

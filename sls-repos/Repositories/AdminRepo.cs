@@ -3,9 +3,7 @@ using sls_borders.Models;
 using sls_borders.Repositories;
 using sls_borders.Data;
 using Microsoft.EntityFrameworkCore;
-using sls_borders.DTO.Admin;
-using System.Security.Cryptography;
-using System.Text;
+using sls_borders.DTO.AdminDto;
 using sls_utils.AuthUtils;
 
 namespace sls_repos.Repositories;

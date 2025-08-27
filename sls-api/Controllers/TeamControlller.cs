@@ -49,29 +49,6 @@ public class TeamController(ITeamRepo teamRepo, IMapper mapper, IImageService im
     }
 
     /// <summary>
-    /// Retrieves information about tournaments in which the specified team has participated.
-    /// </summary>
-    /// <param name="id">The unique identifier of the team.</param>
-    /// <returns>A list of tournaments or a 404 error if the team does not exist.</returns>
-    /// <response code="200">Returns the list of tournaments for the team.</response>
-    /// <response code="404">Returns not found if the team does not exist.</response>
-    [HttpGet("get-tournaments/{id:guid}")]
-    [ProducesResponseType<GetTeamTournamentsDto>(StatusCodes.Status200OK)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<GetTeamTournamentsDto>> GetTeamTournaments(Guid id)
-    {
-        try
-        {
-            var team = await teamRepo.GetTeamTournamentsInfo(id);
-            return Ok(mapper.Map<GetTeamTournamentsDto>(team));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new ErrorResponse { Message = ex.Message });
-        }
-    }
-
-    /// <summary>
     /// Creates a new team in the system.
     /// </summary>
     /// <param name="dto">The team data for creation.</param>

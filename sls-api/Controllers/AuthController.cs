@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using sls_borders.Repositories;
 using sls_utils.AuthUtils;
-using sls_borders.DTO.Admin;
+using sls_borders.DTO.AdminDto;
 using sls_borders.Enums;
 using sls_borders.Models;
 using sls_borders.DTO.ErrorDto;
@@ -39,7 +39,7 @@ public class AuthController(IAdminRepo adminRepo, IUserRepo userRepo, IConfigura
         if (admin == null) return Unauthorized(new ErrorResponse { Message = "Invalid username or password" });
 
         var keyString = configuration["Jwt:Key"] ?? throw new ArgumentNullException("JWT key is not configured.");
-        string token = JwtUtils.GenerateJwtToken(admin.Id, admin.Username, Role.admin, keyString);
+        string token = JwtUtils.GenerateJwtToken(admin.Id, admin.Username, Role.Admin, keyString);
         return Ok(new LoginAdminResponseDto { Token = token });
     }
 
@@ -55,7 +55,7 @@ public class AuthController(IAdminRepo adminRepo, IUserRepo userRepo, IConfigura
         if (user == null) return Unauthorized(new ErrorResponse { Message = "Invalid email or password" });
 
         var keyString = configuration["Jwt:Key"] ?? throw new ArgumentNullException("JWT key is not configured.");
-        string token = JwtUtils.GenerateJwtToken(user.Id, user.Email, Role.user, keyString);
+        string token = JwtUtils.GenerateJwtToken(user.Id, user.Email, user.Role, keyString);
         return Ok(new LoginUserResponseDto { Token = token });
     }
 }

@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using sls_borders.DTO.Game;
+using sls_borders.DTO.GameDto;
 using sls_borders.Repositories;
 using AutoMapper;
 using sls_borders.DTO.ErrorDto;

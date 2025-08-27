@@ -1,17 +1,44 @@
 using sls_borders.Enums;
 
-namespace sls_borders.Models
+namespace sls_borders.Models;
+
+/// <summary>
+/// Represents a tournament in the system.
+/// </summary>
+public class Tournament
 {
-    public class Tournament
-    {
-        public Guid Id { get; set; }
-        public DateTime Date { get; set; }
-        public int? Round { get; set; }
-        public TournamentStatus Status { get; set; } = TournamentStatus.Upcoming;
+    /// <summary>
+    /// Gets or sets the unique identifier of the tournament.
+    /// </summary>
+    public Guid Id { get; set; }
 
-        public Guid EditionId { get; set; } = Guid.Empty;
+    /// <summary>
+    /// Gets or sets the date of the tournament.
+    /// </summary>
+    public DateTime Date { get; set; }
 
-        public Edition Edition { get; set; } = null!;
-        public ICollection<Game> Games { get; set; } = new List<Game>();
-    }
+    /// <summary>
+    /// Gets or sets the round number of the tournament (optional).
+    /// </summary>
+    public int? Round { get; set; }
+
+    /// <summary>
+    /// Gets or sets the status of the tournament.
+    /// </summary>
+    public TournamentStatus Status { get; set; } = TournamentStatus.Upcoming;
+
+    /// <summary>
+    /// Gets or sets the identifier of the edition associated with the tournament.
+    /// </summary>
+    public Guid EditionId { get; set; } = Guid.Empty;
+
+    /// <summary>
+    /// Gets or sets the edition associated with the tournament.
+    /// </summary>
+    public Edition Edition { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the collection of games in the tournament.
+    /// </summary>
+    public ICollection<Game> Games { get; set; } = [];
 }

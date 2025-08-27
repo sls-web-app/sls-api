@@ -1,6 +1,6 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using sls_borders.DTO.Game;
+using sls_borders.DTO.GameDto;
 using sls_borders.Models;
 using sls_borders.Repositories;
 using sls_borders.Data;

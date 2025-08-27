@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using sls_borders.DTO.Admin;
+using sls_borders.DTO.AdminDto;
 using sls_borders.Repositories;
 using sls_borders.DTO.ErrorDto;
 using AutoMapper;
@@ -13,7 +13,7 @@ namespace sls_api.Controllers;
 /// All operations require Admin role authorization.
 /// </summary>
 [ApiController]
-[Authorize(Roles = "admin")]
+[Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerBase
 {
