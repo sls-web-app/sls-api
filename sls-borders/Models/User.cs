@@ -6,18 +6,19 @@ namespace sls_borders.Models
     {
         public Guid Id { get; set; }
         public string Email { get; set; } = null!;
-        public string PasswordHash { get; set; } = null!;
-        public string PasswordSalt { get; set; } = null!;
         public string ProfileImg { get; set; } = null!;
         public string Name { get; set; } = null!;
         public string Surname { get; set; } = null!;
         public string? ClassName { get; set; }
         public Role Role { get; set; } = Role.user;
         public bool AccountActivated { get; set; } = false;
+        public string PasswordHash { get; set; } = null!;
+        public string PasswordSalt { get; set; } = null!;
 
+        public Guid? TeamId { get; set; }
+
+        public Team? Team { get; set; }
         public ICollection<Game> GamesAsWhite { get; set; } = new List<Game>();
         public ICollection<Game> GamesAsBlack { get; set; } = new List<Game>();
-
-        public ICollection<EditionTeamMember> EditionTeamMembers { get; set; } = new List<EditionTeamMember>();
     }
 }

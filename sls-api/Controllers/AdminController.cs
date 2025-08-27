@@ -13,6 +13,7 @@ namespace sls_api.Controllers;
 /// All operations require Admin role authorization.
 /// </summary>
 [ApiController]
+[Authorize(Roles = "admin")]
 [Route("api/[controller]")]
 public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerBase
 {
@@ -23,7 +24,6 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
     /// <response code="200">Returns the list of all administrators.</response>
     /// <response code="401">Returns unauthorized if not authenticated.</response>
     /// <response code="403">Returns forbidden if not authorized as Admin.</response>
-    [Authorize(Roles = "Admin")]
     [HttpGet("get-all")]
     [ProducesResponseType<IEnumerable<GetAdminDto>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -44,7 +44,6 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
     /// <response code="401">Returns unauthorized if not authenticated.</response>
     /// <response code="403">Returns forbidden if not authorized as Admin.</response>
     /// <response code="404">Returns not found if the administrator does not exist.</response>
-    [Authorize(Roles = "Admin")]
     [HttpGet("get-by-id/{id:guid}")]
     [ProducesResponseType<GetAdminDto>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -107,7 +106,6 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
     /// <response code="403">Returns forbidden if not authorized as Admin.</response>
     /// <response code="404">Returns not found if the administrator does not exist.</response>
     /// <response code="409">Returns conflict if there's a business logic violation.</response>
-    [Authorize(Roles = "Admin")]
     [HttpPut("update/{id:guid}")]
     [ProducesResponseType<GetAdminDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -145,7 +143,6 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
     /// <response code="401">Returns unauthorized if not authenticated.</response>
     /// <response code="403">Returns forbidden if not authorized as Admin.</response>
     /// <response code="404">Returns not found if the administrator does not exist.</response>
-    [Authorize(Roles = "Admin")]
     [HttpDelete("delete/{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

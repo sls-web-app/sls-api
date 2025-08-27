@@ -10,8 +10,8 @@ namespace sls_borders.Models
         public TournamentStatus Status { get; set; } = TournamentStatus.Upcoming;
 
         public Guid EditionId { get; set; } = Guid.Empty;
-        public Edition Edition { get; set; } = null!;
 
+        public Edition Edition { get; set; } = null!;
         public ICollection<Game> Games { get; set; } = new List<Game>();
     }
 }

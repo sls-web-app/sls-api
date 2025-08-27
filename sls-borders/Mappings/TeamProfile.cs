@@ -4,8 +4,14 @@ using sls_borders.Models;
 
 namespace sls_borders.Mappings
 {
+    /// <summary>
+    /// AutoMapper profile for mapping between Team entities and DTOs.
+    /// </summary>
     public class TeamProfile : Profile
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TeamProfile"/> class.
+        /// </summary>
         public TeamProfile()
         {
             // Maps from the Team entity to the GetTeamDto
@@ -17,15 +23,13 @@ namespace sls_borders.Mappings
             // Maps from CreateTeamDto to the Team entity.
             // The repository is responsible for handling relationships and image, so we ignore them here.
             CreateMap<CreateTeamDto, Team>()
-                .ForMember(dest => dest.EditionTeamMembers, opt => opt.Ignore())
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
 
             // Maps from UpdateTeamDto to the Team entity.
             // The repository should also handle updating relationships.
             CreateMap<UpdateTeamDto, Team>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.EditionTeamMembers, opt => opt.Ignore());
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
         }
     }
 }

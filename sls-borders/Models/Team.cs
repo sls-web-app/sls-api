@@ -11,6 +11,7 @@ namespace sls_borders.Models
         public string? Img { get; set; } = null!;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public ICollection<EditionTeamMember> EditionTeamMembers { get; set; } = new List<EditionTeamMember>();
+        public ICollection<User> Users { get; set; } = new List<User>();
+        public ICollection<Edition> Editions { get; set; } = new List<Edition>();
     }
 }

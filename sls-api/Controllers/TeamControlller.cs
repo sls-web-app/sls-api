@@ -83,7 +83,7 @@ public class TeamController(ITeamRepo teamRepo, IMapper mapper, IImageService im
     [Consumes("multipart/form-data")]
     [ProducesResponseType<GetTeamDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateTeam([FromForm] CreateTeamDto dto, [FromForm] IFormFile? avatar)
+    public async Task<IActionResult> CreateTeam([FromForm] CreateTeamDto dto, IFormFile? avatar)
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
