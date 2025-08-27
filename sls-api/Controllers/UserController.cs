@@ -5,6 +5,7 @@ using sls_borders.DTO.UserDto;
 using sls_borders.Repositories;
 using AutoMapper;
 using sls_borders.DTO.ErrorDto;
+using sls_borders.Models;
 
 namespace sls_api.Controllers;
 
@@ -14,11 +15,7 @@ namespace sls_api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class UserController(
-    IUserRepo userRepo,
-    ApplicationDbContext dbContext,
-    IMapper mapper
-) : ControllerBase
+public class UserController(IUserRepo userRepo, ApplicationDbContext dbContext, IMapper mapper) : ControllerBase
 {
     /// <summary>
     /// Retrieves all users from the system.
@@ -76,7 +73,7 @@ public class UserController(
     /// <summary>
     /// Creates a new user in the system.
     /// </summary>
-    /// <param name="dto">The user data for creation.</param>
+    /// <param name="createUserDto">The user data for creation.</param>
     /// <returns>The created user or validation/conflict/not found errors.</returns>
     /// <response code="201">Returns the newly created user.</response>
     /// <response code="400">Returns validation errors if the request model is invalid.</response>
@@ -87,20 +84,21 @@ public class UserController(
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<GetUserDto>> CreateUser([FromBody] CreateUserDto dto)
+    public async Task<ActionResult<GetUserDto>> CreateUser([FromBody] CreateUserDto createUserDto)
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
 
-        if (await userRepo.EmailExistsAsync(dto.Email))
-            return Conflict(new ErrorResponse { Message = $"User with email {dto.Email} already exists" });
+        if (await userRepo.EmailExistsAsync(createUserDto.Email))
+            return Conflict(new ErrorResponse { Message = $"User with email {createUserDto.Email} already exists" });
 
-        if (await dbContext.Teams.FindAsync(dto.TeamId) == null)
-            return NotFound(new ErrorResponse { Message = $"Team with ID {dto.TeamId} not found" });
+        if (createUserDto.TeamId != null && await dbContext.Teams.FindAsync(createUserDto.TeamId) == null)
+            return NotFound(new ErrorResponse { Message = $"Team with ID {createUserDto.TeamId} not found" });
 
         try
         {
-            var createdUser = await userRepo.CreateAsync(dto); // Pass emailRepo
+            var user = mapper.Map<User>(createUserDto);
+            var createdUser = await userRepo.CreateAsync(user, createUserDto.Password); 
             return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, mapper.Map<GetUserDto>(createdUser));
         }
         catch (KeyNotFoundException ex)
@@ -117,7 +115,7 @@ public class UserController(
     /// Updates an existing user with new data.
     /// </summary>
     /// <param name="id">The unique identifier of the user to update.</param>
-    /// <param name="dto">The updated user data.</param>
+    /// <param name="updateUserDto">The updated user data.</param>
     /// <returns>The updated user or a 404 error if not found.</returns>
     /// <response code="200">Returns the updated user.</response>
     /// <response code="400">Returns validation errors if the request model is invalid.</response>
@@ -126,14 +124,14 @@ public class UserController(
     [ProducesResponseType<GetUserDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<GetUserDto>> UpdateUser(Guid id, [FromBody] UpdateUserDto dto)
+    public async Task<ActionResult<GetUserDto>> UpdateUser(Guid id, [FromBody] UpdateUserDto updateUserDto)
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
 
         try
         {
-            var updatedUser = await userRepo.UpdateAsync(id, dto);
+            var updatedUser = await userRepo.UpdateAsync(id, updateUserDto);
 
             if (updatedUser == null)
                 return NotFound(new ErrorResponse { Message = $"User with ID {id} not found" });

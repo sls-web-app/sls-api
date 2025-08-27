@@ -4,6 +4,7 @@ using sls_borders.Repositories;
 using AutoMapper;
 using sls_borders.DTO.ErrorDto;
 using sls_borders.Enums;
+using sls_borders.Models;
 
 namespace sls_api.Controllers;
 
@@ -51,7 +52,7 @@ public class TeamController(ITeamRepo teamRepo, IMapper mapper, IImageService im
     /// <summary>
     /// Creates a new team in the system.
     /// </summary>
-    /// <param name="dto">The team data for creation.</param>
+    /// <param name="createTeamDto">The team data for creation.</param>
     /// <param name="avatar">The team avatar image file (optional).</param>
     /// <returns>The created team or validation errors.</returns>
     /// <response code="201">Returns the newly created team.</response>
@@ -60,19 +61,21 @@ public class TeamController(ITeamRepo teamRepo, IMapper mapper, IImageService im
     [Consumes("multipart/form-data")]
     [ProducesResponseType<GetTeamDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateTeam([FromForm] CreateTeamDto dto, IFormFile? avatar)
+    public async Task<IActionResult> CreateTeam([FromForm] CreateTeamDto createTeamDto, IFormFile? avatar)
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
 
+        var team = mapper.Map<Team>(createTeamDto);
+        
         // Handle avatar upload if provided
         if (avatar != null)
         {
             using var stream = avatar.OpenReadStream();
             var uploadResult = await imageService.UploadImageAsync(
-                stream, 
-                avatar.FileName, 
-                avatar.ContentType, 
+                stream,
+                avatar.FileName,
+                avatar.ContentType,
                 ImageCategory.Avatar);
 
             if (!uploadResult.Success)
@@ -81,10 +84,10 @@ public class TeamController(ITeamRepo teamRepo, IMapper mapper, IImageService im
             }
 
             // Set the image URL in the DTO
-            dto.Img = uploadResult.ImageUrl;
+            team.Img = uploadResult.ImageUrl;
         }
 
-        var createdTeam = await teamRepo.CreateAsync(dto);
+        var createdTeam = await teamRepo.CreateAsync(team);
         return CreatedAtAction(nameof(GetTeamById), new { id = createdTeam.Id }, mapper.Map<GetTeamDto>(createdTeam));
     }
 

@@ -43,15 +43,14 @@ public class UserInviteController(IUserInviteRepo userInviteRepo, IUserRepo user
 
         try
         {
-            var createdUser = await userRepo.CreateAsync(new CreateUserDto
+            var createdUser = await userRepo.CreateAsync(new User
             {
                 Email = inviteDto.Email,
                 Name = inviteDto.Name,
                 Surname = inviteDto.Surname,
                 Role = inviteDto.Role,
-                Password = string.Empty, // Password will be set up later
                 ProfileImg = string.Empty
-            });
+            }, string.Empty);
 
             var userInvite = new UserInvite
             {

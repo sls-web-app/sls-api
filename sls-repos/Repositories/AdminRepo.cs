@@ -8,7 +8,7 @@ using sls_utils.AuthUtils;
 
 namespace sls_repos.Repositories;
 
-public class AdminRepo(ApplicationDbContext context, IMapper mapper) : IAdminRepo
+public class AdminRepo(ApplicationDbContext context) : IAdminRepo
 {
     public async Task<Admin?> LoginAsync(string username, string password)
     {
@@ -32,19 +32,18 @@ public class AdminRepo(ApplicationDbContext context, IMapper mapper) : IAdminRep
         return await context.Admins.FindAsync(id);
     }
 
-    public async Task<Admin> CreateAsync(CreateAdminDto newAdmin)
+    public async Task<Admin> CreateAsync(Admin admin, string password)
     {
         
         var existingAdmin = await context.Admins
-            .FirstOrDefaultAsync(a => a.Username == newAdmin.Username);
+            .FirstOrDefaultAsync(a => a.Username == admin.Username);
 
         if (existingAdmin != null)
         {
-            throw new InvalidOperationException($"Username '{newAdmin.Username}' is already taken.");
+            throw new InvalidOperationException($"Username '{admin.Username}' is already taken.");
         }
 
-        var admin = mapper.Map<Admin>(newAdmin);
-        (string passwordHash, string passwordSalt) = HashingUtils.HashPassword(newAdmin.Password);
+        (string passwordHash, string passwordSalt) = HashingUtils.HashPassword(password);
         admin.PasswordHash = passwordHash;
         admin.PasswordSalt = passwordSalt;
         context.Admins.Add(admin);
@@ -58,7 +57,7 @@ public class AdminRepo(ApplicationDbContext context, IMapper mapper) : IAdminRep
         var existingAdmin = await context.Admins.FindAsync(id);
         if (existingAdmin == null) return null;
 
-        if (existingAdmin.Username != adminDto.Username)
+        if(!string.IsNullOrEmpty(adminDto.Username))
         {
             var usernameExists = await context.Admins
                 .AnyAsync(a => a.Username == adminDto.Username && a.Id != id);
@@ -67,9 +66,10 @@ public class AdminRepo(ApplicationDbContext context, IMapper mapper) : IAdminRep
             {
                 throw new InvalidOperationException($"Username '{adminDto.Username}' is already taken.");
             }
+
+            existingAdmin.Username = adminDto.Username;
         }
 
-        existingAdmin.Username = adminDto.Username;
 
         if (!string.IsNullOrEmpty(adminDto.Password))
         {

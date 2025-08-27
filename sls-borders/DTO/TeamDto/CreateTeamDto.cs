@@ -19,9 +19,4 @@ public class CreateTeamDto
     /// Gets or sets the address of the team.
     /// </summary>
     public string Address { get; set; } = null!;
-
-    /// <summary>
-    /// Gets or sets the image URL of the team (optional).
-    /// </summary>
-    public string? Img { get; set; }
 }

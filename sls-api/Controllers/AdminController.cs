@@ -4,6 +4,7 @@ using sls_borders.Repositories;
 using sls_borders.DTO.ErrorDto;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using sls_borders.Models;
 
 namespace sls_api.Controllers;
 
@@ -63,7 +64,7 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
     /// <summary>
     /// Creates a new administrator in the system.
     /// </summary>
-    /// <param name="dto">The administrator data for creation.</param>
+    /// <param name="createAdminDto">The administrator data for creation.</param>
     /// <returns>The created administrator or validation/conflict errors.</returns>
     /// <response code="201">Returns the newly created administrator.</response>
     /// <response code="400">Returns validation errors if the request model is invalid.</response>
@@ -77,14 +78,15 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<GetAdminDto>> CreateAdmin([FromBody] CreateAdminDto dto)
+    public async Task<ActionResult<GetAdminDto>> CreateAdmin([FromBody] CreateAdminDto createAdminDto)
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
 
         try
         {
-            var createdAdmin = await adminRepo.CreateAsync(dto);
+            var admin = mapper.Map<Admin>(createAdminDto);
+            var createdAdmin = await adminRepo.CreateAsync(admin, createAdminDto.Password);
             var responseDto = mapper.Map<GetAdminDto>(createdAdmin);
             return CreatedAtAction(nameof(GetAdminById), new { id = responseDto.Id }, responseDto);
         }
@@ -98,7 +100,7 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
     /// Updates an existing administrator with new data.
     /// </summary>
     /// <param name="id">The unique identifier of the administrator to update.</param>
-    /// <param name="dto">The updated administrator data.</param>
+    /// <param name="updateAdminDto">The updated administrator data.</param>
     /// <returns>The updated administrator or error/404 responses.</returns>
     /// <response code="200">Returns the updated administrator.</response>
     /// <response code="400">Returns validation errors if the request model is invalid.</response>
@@ -113,14 +115,14 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<GetAdminDto>> UpdateAdmin(Guid id, [FromBody] UpdateAdminDto dto)
+    public async Task<ActionResult<GetAdminDto>> UpdateAdmin(Guid id, [FromBody] UpdateAdminDto updateAdminDto)
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
 
         try
         {
-            var updatedAdmin = await adminRepo.UpdateAsync(id, dto);
+            var updatedAdmin = await adminRepo.UpdateAsync(id, updateAdminDto);
 
             if (updatedAdmin == null)
                 return NotFound(new ErrorResponse { Message = $"Admin with ID {id} not found" });

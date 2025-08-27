@@ -8,7 +8,7 @@ public class UpdateAdminDto
     /// <summary>
     /// Gets or sets the username of the admin.
     /// </summary>
-    public required string Username { get; set; }
+    public string? Username { get; set; }
 
     /// <summary>
     /// Gets or sets the new password of the admin (optional).

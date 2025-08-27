@@ -33,9 +33,19 @@ public class Tournament
     public Guid EditionId { get; set; } = Guid.Empty;
 
     /// <summary>
+    /// Gets or sets the identifier of the organizing team.
+    /// </summary>
+    public Guid OrganizingTeamId { get; set; } = Guid.Empty;
+
+    /// <summary>
     /// Gets or sets the edition associated with the tournament.
     /// </summary>
     public Edition Edition { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the organizing team of the tournament.
+    /// </summary>
+    public Team OrganizingTeam { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the collection of games in the tournament.

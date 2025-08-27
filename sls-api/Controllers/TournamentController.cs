@@ -3,6 +3,7 @@ using sls_borders.DTO.TournamentDto;
 using sls_borders.Repositories;
 using AutoMapper;
 using sls_borders.DTO.ErrorDto;
+using sls_borders.Models;
 
 namespace sls_api.Controllers;
 
@@ -50,7 +51,7 @@ public class TournamentController(ITournamentRepo tournamentRepo, IMapper mapper
     /// <summary>
     /// Creates a new tournament in the system.
     /// </summary>
-    /// <param name="createDto">The tournament data for creation.</param>
+    /// <param name="createTournamentDto">The tournament data for creation.</param>
     /// <returns>The created tournament or validation/not found errors.</returns>
     /// <response code="201">Returns the newly created tournament.</response>
     /// <response code="400">Returns validation errors if the request model is invalid.</response>
@@ -59,14 +60,15 @@ public class TournamentController(ITournamentRepo tournamentRepo, IMapper mapper
     [ProducesResponseType<GetTournamentDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> CreateTournament([FromBody] CreateTournamentDto createDto)
+    public async Task<IActionResult> CreateTournament([FromBody] CreateTournamentDto createTournamentDto)
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
 
         try
         {
-            var createdTournament = await tournamentRepo.CreateAsync(createDto);
+            var tournament = mapper.Map<Tournament>(createTournamentDto);
+            var createdTournament = await tournamentRepo.CreateAsync(tournament);
             return CreatedAtAction(nameof(GetTournamentById), new { id = createdTournament.Id }, mapper.Map<GetTournamentDto>(createdTournament));
         }
         catch (KeyNotFoundException ex)

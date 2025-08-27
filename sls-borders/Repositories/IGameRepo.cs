@@ -7,7 +7,7 @@ namespace sls_borders.Repositories
     {
         Task<List<Game>> GetAllAsync();
         Task<Game?> GetByIdAsync(Guid id);
-        Task<Game> CreateAsync(CreateGameDto game);
+        Task<Game> CreateAsync(Game game);
         Task<Game?> UpdateAsync(Guid id, UpdateGameDto game);
         Task<bool> DeleteAsync(Guid id);
     }

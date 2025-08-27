@@ -6,17 +6,15 @@ using sls_borders.Models;
 using sls_borders.Repositories;
 
 namespace sls_repos.Repositories;
-public class EditionRepo(ApplicationDbContext context, IMapper mapper) : IEditionRepo
+public class EditionRepo(ApplicationDbContext context) : IEditionRepo
 {
     public async Task<List<Edition>> GetAllAsync()
     {
         return await context.Editions.ToListAsync();
     }
 
-    public async Task<Edition> CreateAsync(CreateEditionDto newEdition)
+    public async Task<Edition> CreateAsync(Edition edition)
     {
-        var edition = mapper.Map<Edition>(newEdition);
-
         context.Editions.Add(edition);
         await context.SaveChangesAsync();
         return edition;

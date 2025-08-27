@@ -7,8 +7,6 @@ namespace sls_borders.Repositories
         Task<List<UserInvite>> GetAllAsync();
         Task<UserInvite?> GetByIdAsync(Guid id);
         Task<UserInvite> CreateAsync(UserInvite userInvite);
-        // Task<UserInvite?> UpdateAsync(Guid id, UserInvite userInvite);
         Task<bool> DeleteAsync(Guid id);
-
     }
 }

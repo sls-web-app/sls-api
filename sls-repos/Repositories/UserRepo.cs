@@ -2,13 +2,14 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using sls_borders.Data;
 using sls_borders.DTO.UserDto;
+using sls_borders.Enums;
 using sls_borders.Models;
 using sls_borders.Repositories;
 using sls_utils.AuthUtils;
 
 namespace sls_repos.Repositories;
 
-public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
+public class UserRepo(ApplicationDbContext context) : IUserRepo
 {
     public async Task<User?> LoginAsync(string email, string password)
     {
@@ -38,22 +39,20 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
             .FirstOrDefaultAsync(u => u.Id == id);
     }
 
-    public async Task<User> CreateAsync(CreateUserDto createUserDto)
+    public async Task<User> CreateAsync(User user, string password)
     {
-        var user = mapper.Map<User>(createUserDto);
+        var emailExists = await EmailExistsAsync(user.Email);
+        if (emailExists)
+            throw new InvalidOperationException($"Email '{user.Email}' is already in use.");
 
-        (string passwordHash, string passwordSalt) = HashingUtils.HashPassword(createUserDto.Password);
+        (string passwordHash, string passwordSalt) = HashingUtils.HashPassword(password);
         user.PasswordHash = passwordHash;
         user.PasswordSalt = passwordSalt;
 
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
-        // Reload the user with related data
-        return await context.Users
-            .Include(u => u.GamesAsWhite)
-            .Include(u => u.GamesAsBlack)
-            .FirstAsync(u => u.Id == user.Id);
+        return user;
     }
 
     public async Task<User?> UpdateAsync(Guid id, UpdateUserDto updateUserDto)
@@ -62,7 +61,7 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
 
         if (existingUser == null) return null;
 
-        if (existingUser.Email != updateUserDto.Email)
+        if(!string.IsNullOrEmpty(updateUserDto.Email))
         {
             var emailExists = await EmailExistsAsync(updateUserDto.Email);
             if (emailExists)
@@ -71,14 +70,25 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
             }
         }
 
-        mapper.Map(updateUserDto, existingUser);
-
         if (!string.IsNullOrEmpty(updateUserDto.Password))
         {
             (string passwordHash, string passwordSalt) = HashingUtils.HashPassword(updateUserDto.Password);
             existingUser.PasswordHash = passwordHash;
             existingUser.PasswordSalt = passwordSalt;
         }
+
+        if (!string.IsNullOrEmpty(updateUserDto.ProfileImg))
+            existingUser.ProfileImg = updateUserDto.ProfileImg;
+        if (!string.IsNullOrEmpty(updateUserDto.Name))
+            existingUser.Name = updateUserDto.Name;
+        if (!string.IsNullOrEmpty(updateUserDto.Surname))
+            existingUser.Surname = updateUserDto.Surname;
+        if (!string.IsNullOrEmpty(updateUserDto.ClassName))
+            existingUser.ClassName = updateUserDto.ClassName;
+        if (updateUserDto.Role.HasValue)
+            existingUser.Role = (Role)updateUserDto.Role;
+        if(updateUserDto.TeamId.HasValue)
+            existingUser.TeamId = updateUserDto.TeamId;
 
         context.Users.Update(existingUser);
         await context.SaveChangesAsync();

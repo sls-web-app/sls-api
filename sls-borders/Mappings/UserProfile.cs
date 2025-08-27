@@ -17,8 +17,6 @@ public class UserProfile : Profile
         CreateMap<CreateUserDto, User>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
 
-        CreateMap<UpdateUserDto, User>();
-
         CreateMap<User, GetUserDto>();
     }
 }

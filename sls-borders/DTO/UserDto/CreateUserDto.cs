@@ -45,5 +45,5 @@ public class CreateUserDto
     /// <summary>
     /// Gets or sets the team ID associated with the user.
     /// </summary>
-    public Guid TeamId { get; set; } = Guid.Empty;
+    public Guid? TeamId { get; set; }
 }

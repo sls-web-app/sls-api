@@ -10,7 +10,7 @@ public class UpdateTournamentDto
     /// <summary>
     /// Gets or sets the date of the tournament.
     /// </summary>
-    public DateTime Date { get; set; }
+    public DateTime? Date { get; set; }
 
     /// <summary>
     /// Gets or sets the round number of the tournament (optional).
@@ -20,15 +20,15 @@ public class UpdateTournamentDto
     /// <summary>
     /// Gets or sets the status of the tournament.
     /// </summary>
-    public TournamentStatus Status { get; set; } = TournamentStatus.Upcoming;
+    public TournamentStatus? Status { get; set; }
 
     /// <summary>
     /// Gets or sets the identifier of the organizing team.
     /// </summary>
-    public Guid OrganizingTeamId { get; set; } = Guid.Empty;
+    public Guid? OrganizingTeamId { get; set; }
 
     /// <summary>
     /// Gets or sets the identifier of the edition.
     /// </summary>
-    public Guid EditionId { get; set; }
+    public Guid? EditionId { get; set; }
 }
