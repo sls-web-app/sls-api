@@ -20,12 +20,10 @@ public class TeamProfile : Profile
         // Maps from CreateTeamDto to the Team entity.
         // The repository is responsible for handling relationships and image, so we ignore them here.
         CreateMap<CreateTeamDto, Team>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
 
         // Maps from UpdateTeamDto to the Team entity.
         // The repository should also handle updating relationships.
-        CreateMap<UpdateTeamDto, Team>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore());
+        CreateMap<UpdateTeamDto, Team>();
     }
 }

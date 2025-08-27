@@ -19,20 +19,9 @@ public class GameProfile : Profile
 
         // CreateGameDto -> Game
         CreateMap<CreateGameDto, Game>()
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
-            .ForMember(dest => dest.Round, opt => opt.Ignore())
-            .ForMember(dest => dest.Score, opt => opt.Ignore())
-            .ForMember(dest => dest.TournamentId, opt => opt.MapFrom(src => src.TournamentId))
-            .ForMember(dest => dest.WhitePlayerId, opt => opt.MapFrom(src => src.WhitePlayerId))
-            .ForMember(dest => dest.BlackPlayerId, opt => opt.MapFrom(src => src.BlackPlayerId));
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
 
         // UpdateGameDto -> Game
-        CreateMap<UpdateGameDto, Game>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Round, opt => opt.MapFrom(src => src.Round))
-            .ForMember(dest => dest.Score, opt => opt.MapFrom(src => src.Score))
-            .ForMember(dest => dest.TournamentId, opt => opt.MapFrom(src => src.TournamentId))
-            .ForMember(dest => dest.WhitePlayerId, opt => opt.MapFrom(src => src.WhitePlayerId))
-            .ForMember(dest => dest.BlackPlayerId, opt => opt.MapFrom(src => src.BlackPlayerId));
+        CreateMap<UpdateGameDto, Game>();
     }
 }
