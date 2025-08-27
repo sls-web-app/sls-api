@@ -52,9 +52,9 @@ public class ImageController(IImageService imageService) : ControllerBase
     /// <returns>Success status</returns>
     [HttpDelete("{category}/{fileName}")]
     [Authorize]
-    public async Task<ActionResult<bool>> DeleteImage(string fileName, ImageCategory category)
+    public ActionResult<bool> DeleteImage(string fileName, ImageCategory category)
     {
-        var result = await imageService.DeleteImageAsync(fileName, category);
+        var result = imageService.DeleteImage(fileName, category);
         
         if (result)
         {

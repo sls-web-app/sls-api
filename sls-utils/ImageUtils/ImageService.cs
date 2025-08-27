@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using sls_borders.DTO.ImageDto;
@@ -120,7 +121,7 @@ namespace sls_utils.ImageUtils
         /// <param name="fileName">The name of the file to delete</param>
         /// <param name="category">The category of the image</param>
         /// <returns>True if deletion was successful</returns>
-        public async Task<bool> DeleteImageAsync(string fileName, ImageCategory category)
+        public bool DeleteImage(string fileName, ImageCategory category)
         {
             try
             {

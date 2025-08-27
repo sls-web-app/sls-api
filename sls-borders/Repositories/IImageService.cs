@@ -11,8 +11,10 @@ namespace sls_borders.Repositories
         /// <summary>
         /// Uploads an image file to the appropriate category folder
         /// </summary>
-        /// <param name="file">The image file to upload</param>
+        /// <param name="fileStream">The image file to upload</param>
         /// <param name="category">The category (Avatar or Image)</param>
+        /// <param name="fileName">The name of the file</param>
+        /// <param name="contentType">The MIME type of the file</param>
         /// <returns>Result containing file information and URL</returns>
         Task<ImageUploadResultDto> UploadImageAsync(Stream fileStream, string fileName, string contentType, ImageCategory category);
         
@@ -22,7 +24,7 @@ namespace sls_borders.Repositories
         /// <param name="fileName">The name of the file to delete</param>
         /// <param name="category">The category of the image</param>
         /// <returns>True if deletion was successful</returns>
-        Task<bool> DeleteImageAsync(string fileName, ImageCategory category);
+        bool DeleteImage(string fileName, ImageCategory category);
         
         /// <summary>
         /// Gets the URL for an image
