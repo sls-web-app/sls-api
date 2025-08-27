@@ -1,4 +1,4 @@
-using sls_borders.DTO.Team;
+using sls_borders.DTO.TeamDto;
 using sls_borders.Models;
 
 namespace sls_borders.Repositories

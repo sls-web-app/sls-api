@@ -92,7 +92,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors("DevelopmentCorsPolicy");
 
 // Configure static files serving for uploaded images
-var uploadsPathConfig = builder.Configuration["ImageUpload:Path"];
+var uploadsPathConfig = builder.Configuration["ImageUpload:Path"] ?? "Uploads";
 var uploadsPath = Path.IsPathRooted(uploadsPathConfig)
     ? uploadsPathConfig
     : Path.Combine(Directory.GetCurrentDirectory(), uploadsPathConfig);

@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using sls_borders.DTO.UserDto;
 using sls_borders.Repositories;
-using AutoMapper;
 using sls_borders.DTO.ErrorDto;
 using sls_borders.Models;
 using sls_utils.EmailUtils;
@@ -14,7 +13,7 @@ namespace sls_api.Controllers;
 [ApiController]
 [Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
-public class UserInviteController(IUserInviteRepo userInviteRepo, ITeamRepo teamRepo, IMapper mapper, IUserRepo userRepo, IConfiguration configuration) : ControllerBase
+public class UserInviteController(IUserInviteRepo userInviteRepo, IUserRepo userRepo, IConfiguration configuration) : ControllerBase
 {
     [HttpGet("get-all")]
     public async Task<ActionResult<IEnumerable<InviteUserDto>>> GetAllInvites()
@@ -44,15 +43,12 @@ public class UserInviteController(IUserInviteRepo userInviteRepo, ITeamRepo team
 
         try
         {
-            var succeeded = Enum.TryParse(inviteDto.Role.ToLower(), out Role role);
-            if (!succeeded) return BadRequest(new ErrorResponse { Message = $"Invalid role: {inviteDto.Role}" });
-
             var createdUser = await userRepo.CreateAsync(new CreateUserDto
             {
                 Email = inviteDto.Email,
                 Name = inviteDto.Name,
                 Surname = inviteDto.Surname,
-                Role = role,
+                Role = inviteDto.Role,
                 Password = string.Empty, // Password will be set up later
                 ProfileImg = string.Empty
             });

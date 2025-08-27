@@ -1,7 +1,7 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using sls_borders.Data;
-using sls_borders.DTO.Team;
+using sls_borders.DTO.TeamDto;
 using sls_borders.Models;
 using sls_borders.Repositories;
 

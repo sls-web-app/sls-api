@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using sls_borders.DTO.Team;
+using sls_borders.DTO.TeamDto;
 using sls_borders.Repositories;
 using AutoMapper;
 using sls_borders.DTO.ErrorDto;
