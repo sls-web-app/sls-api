@@ -13,7 +13,6 @@ public class JwtUtils
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha512Signature);
 
-
         var claims = new List<Claim>
         {
             new (ClaimTypes.NameIdentifier, id.ToString()),
@@ -21,13 +20,14 @@ public class JwtUtils
             new (ClaimTypes.Role, role.ToString())
         };
 
-        var token = new JwtSecurityToken(
-            issuer: null,
-            audience: null,
-            claims: claims,
-            expires: DateTime.Now.AddDays(1),
-            signingCredentials: credentials
-        );
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Expires = DateTime.Now.AddDays(1),
+            SigningCredentials = credentials
+        };
+
+        var token = new JwtSecurityTokenHandler().CreateToken(tokenDescriptor);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
