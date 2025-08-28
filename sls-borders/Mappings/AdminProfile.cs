@@ -9,9 +9,6 @@ namespace sls_borders.Mappings;
 /// </summary>
 public class AdminProfile : Profile
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AdminProfile"/> class.
-    /// </summary>
     public AdminProfile()
     {
         CreateMap<CreateAdminDto, Admin>()

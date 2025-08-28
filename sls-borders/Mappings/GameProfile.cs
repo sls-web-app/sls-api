@@ -9,9 +9,6 @@ namespace sls_borders.Mappings;
 /// </summary>
 public class GameProfile : Profile
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GameProfile"/> class.
-    /// </summary>
     public GameProfile()
     {
         // Game -> GetGameDto

@@ -7,9 +7,6 @@ namespace sls_borders.DTO.ImageDto
     /// </summary>
     public class UploadImageRequestDto
     {
-        /// <summary>
-        /// The category of the image (Avatar or Image)
-        /// </summary>
         public ImageCategory Category { get; set; }
     }
 }

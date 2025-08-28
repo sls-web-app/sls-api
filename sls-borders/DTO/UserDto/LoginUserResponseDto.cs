@@ -5,8 +5,5 @@ namespace sls_borders.DTO.UserDto;
 /// </summary>
 public class LoginUserResponseDto
 {
-    /// <summary>
-    /// Gets or sets the JWT token for the logged-in user.
-    /// </summary>
     public string Token { get; set; } = null!;
 }

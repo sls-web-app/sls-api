@@ -9,9 +9,6 @@ namespace sls_borders.Mappings;
 /// </summary>
 public class TournamentProfile : Profile
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="TournamentProfile"/> class.
-    /// </summary>
     public TournamentProfile()
     {
         // Maps from the data transfer object for creation to the main entity.

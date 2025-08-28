@@ -9,9 +9,6 @@ namespace sls_borders.Mappings;
 /// </summary>
 public class EditionProfile : Profile
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="EditionProfile"/> class.
-    /// </summary>
     public EditionProfile()
     {
         CreateMap<Edition, GetEditionDto>();
