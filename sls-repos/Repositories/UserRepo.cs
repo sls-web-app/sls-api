@@ -1,4 +1,3 @@
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using sls_borders.Data;
 using sls_borders.DTO.UserDto;
@@ -87,8 +86,14 @@ public class UserRepo(ApplicationDbContext context) : IUserRepo
             existingUser.ClassName = updateUserDto.ClassName;
         if (updateUserDto.Role.HasValue)
             existingUser.Role = (Role)updateUserDto.Role;
-        if(updateUserDto.TeamId.HasValue)
-            existingUser.TeamId = updateUserDto.TeamId;
+        if (updateUserDto.AccountActivated.HasValue)
+            existingUser.AccountActivated = updateUserDto.AccountActivated.Value;
+        if (updateUserDto.IsInPlay.HasValue)
+            existingUser.IsInPlay = updateUserDto.IsInPlay.Value;
+        if (updateUserDto.IsLider.HasValue)
+            existingUser.IsLider = updateUserDto.IsLider.Value;
+        if (updateUserDto.TeamId.HasValue)
+                existingUser.TeamId = updateUserDto.TeamId;
 
         context.Users.Update(existingUser);
         await context.SaveChangesAsync();
