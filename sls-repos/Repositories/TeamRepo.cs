@@ -1,13 +1,13 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using sls_borders.Data;
-using sls_borders.DTO.Team;
+using sls_borders.DTO.TeamDto;
 using sls_borders.Models;
 using sls_borders.Repositories;
 
 namespace sls_repos.Repositories;
 
-public class TeamRepo(ApplicationDbContext context, IMapper mapper) : ITeamRepo
+public class TeamRepo(ApplicationDbContext context) : ITeamRepo
 {
     public async Task<List<Team>> GetAllAsync()
     {
@@ -19,10 +19,8 @@ public class TeamRepo(ApplicationDbContext context, IMapper mapper) : ITeamRepo
         return await context.Teams.FindAsync(id);
     }
 
-    public async Task<Team> CreateAsync(CreateTeamDto createTeamDto)
+    public async Task<Team> CreateAsync(Team team)
     {
-        var team = mapper.Map<Team>(createTeamDto);
-
         context.Teams.Add(team);
         await context.SaveChangesAsync();
 
@@ -35,8 +33,18 @@ public class TeamRepo(ApplicationDbContext context, IMapper mapper) : ITeamRepo
 
         if (existingTeam == null)
             return null;
-
-        mapper.Map(updateTeamDto, existingTeam);
+        
+        if(!string.IsNullOrEmpty(updateTeamDto.Name))
+            existingTeam.Name = updateTeamDto.Name;
+        
+        if(!string.IsNullOrEmpty(updateTeamDto.Short))
+            existingTeam.Short = updateTeamDto.Short;
+        
+        if(!string.IsNullOrEmpty(updateTeamDto.Address))
+            existingTeam.Address = updateTeamDto.Address;
+        
+        if(!string.IsNullOrEmpty(updateTeamDto.Img))
+            existingTeam.Img = updateTeamDto.Img;
 
         await context.SaveChangesAsync();
         return existingTeam;

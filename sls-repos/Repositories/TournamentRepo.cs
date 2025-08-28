@@ -7,7 +7,7 @@ using sls_borders.Repositories;
 
 namespace sls_repos.Repositories;
 
-public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITournamentRepo
+public class TournamentRepo(ApplicationDbContext context) : ITournamentRepo
 {
     public async Task<List<Tournament>> GetAllAsync()
     {
@@ -23,13 +23,8 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
             .FirstOrDefaultAsync(t => t.Id == id);
     }
 
-    public async Task<Tournament> CreateAsync(CreateTournamentDto createDto)
+    public async Task<Tournament> CreateAsync(Tournament tournament)
     {
-        var tournament = mapper.Map<Tournament>(createDto);
-
-        // **FIX: Specify that the incoming date is UTC**
-        tournament.Date = DateTime.SpecifyKind(tournament.Date, DateTimeKind.Utc);
-
         context.Tournaments.Add(tournament);
         await context.SaveChangesAsync();
 
@@ -43,10 +38,16 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
         if (existingTournament == null)
             return null;
 
-        mapper.Map(updateDto, existingTournament);
-
-        // **FIX: Specify that the updated date is UTC**
-        existingTournament.Date = DateTime.SpecifyKind(existingTournament.Date, DateTimeKind.Utc);
+        if(updateDto.Date.HasValue)
+            existingTournament.Date = updateDto.Date.Value;
+        if(updateDto.Round.HasValue)
+            existingTournament.Round = updateDto.Round;
+        if(updateDto.Status.HasValue)
+            existingTournament.Status = updateDto.Status.Value;
+        if(updateDto.OrganizingTeamId.HasValue)
+            existingTournament.OrganizingTeamId = updateDto.OrganizingTeamId.Value;
+        if(updateDto.EditionId.HasValue)
+            existingTournament.EditionId = updateDto.EditionId.Value;
 
         await context.SaveChangesAsync();
         return existingTournament;

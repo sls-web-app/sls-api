@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using sls_borders.Data;
@@ -11,9 +12,11 @@ using sls_borders.Data;
 namespace sls_repos.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250827153044_Update")]
+    partial class Update
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -189,9 +192,6 @@ namespace sls_repos.Migrations
                     b.Property<Guid>("EditionId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("OrganizingTeamId")
-                        .HasColumnType("uuid");
-
                     b.Property<int?>("Round")
                         .HasColumnType("integer");
 
@@ -201,8 +201,6 @@ namespace sls_repos.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("EditionId");
-
-                    b.HasIndex("OrganizingTeamId");
 
                     b.ToTable("Tournaments");
                 });
@@ -344,15 +342,7 @@ namespace sls_repos.Migrations
                         .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
 
-                    b.HasOne("sls_borders.Models.Team", "OrganizingTeam")
-                        .WithMany()
-                        .HasForeignKey("OrganizingTeamId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Edition");
-
-                    b.Navigation("OrganizingTeam");
                 });
 
             modelBuilder.Entity("sls_borders.Models.User", b =>

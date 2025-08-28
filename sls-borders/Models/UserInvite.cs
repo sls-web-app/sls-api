@@ -1,10 +1,17 @@
-using sls_borders.Enums;
+namespace sls_borders.Models;
 
-namespace sls_borders.Models
+/// <summary>
+/// Represents a user invitation in the system.
+/// </summary>
+public class UserInvite
 {
-    public class UserInvite
-    {
-        public Guid Id { get; set; }
-        public Guid UserId { get; set; } = Guid.Empty;
-    }
+    /// <summary>
+    /// Gets or sets the unique identifier for the user invite.
+    /// </summary>
+    public Guid Id { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the email address of the invited user.
+    /// </summary>
+    public Guid UserId { get; set; } = Guid.Empty;
 }

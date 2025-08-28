@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using sls_borders.DTO.Admin;
+using sls_borders.DTO.AdminDto;
 using sls_borders.Repositories;
 using sls_borders.DTO.ErrorDto;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using sls_borders.Models;
 
 namespace sls_api.Controllers;
 
@@ -13,6 +14,7 @@ namespace sls_api.Controllers;
 /// All operations require Admin role authorization.
 /// </summary>
 [ApiController]
+[Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerBase
 {
@@ -23,7 +25,6 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
     /// <response code="200">Returns the list of all administrators.</response>
     /// <response code="401">Returns unauthorized if not authenticated.</response>
     /// <response code="403">Returns forbidden if not authorized as Admin.</response>
-    [Authorize(Roles = "Admin")]
     [HttpGet("get-all")]
     [ProducesResponseType<IEnumerable<GetAdminDto>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -44,7 +45,6 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
     /// <response code="401">Returns unauthorized if not authenticated.</response>
     /// <response code="403">Returns forbidden if not authorized as Admin.</response>
     /// <response code="404">Returns not found if the administrator does not exist.</response>
-    [Authorize(Roles = "Admin")]
     [HttpGet("get-by-id/{id:guid}")]
     [ProducesResponseType<GetAdminDto>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -64,7 +64,7 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
     /// <summary>
     /// Creates a new administrator in the system.
     /// </summary>
-    /// <param name="dto">The administrator data for creation.</param>
+    /// <param name="createAdminDto">The administrator data for creation.</param>
     /// <returns>The created administrator or validation/conflict errors.</returns>
     /// <response code="201">Returns the newly created administrator.</response>
     /// <response code="400">Returns validation errors if the request model is invalid.</response>
@@ -78,14 +78,15 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<GetAdminDto>> CreateAdmin([FromBody] CreateAdminDto dto)
+    public async Task<ActionResult<GetAdminDto>> CreateAdmin([FromBody] CreateAdminDto createAdminDto)
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
 
         try
         {
-            var createdAdmin = await adminRepo.CreateAsync(dto);
+            var admin = mapper.Map<Admin>(createAdminDto);
+            var createdAdmin = await adminRepo.CreateAsync(admin, createAdminDto.Password);
             var responseDto = mapper.Map<GetAdminDto>(createdAdmin);
             return CreatedAtAction(nameof(GetAdminById), new { id = responseDto.Id }, responseDto);
         }
@@ -99,7 +100,7 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
     /// Updates an existing administrator with new data.
     /// </summary>
     /// <param name="id">The unique identifier of the administrator to update.</param>
-    /// <param name="dto">The updated administrator data.</param>
+    /// <param name="updateAdminDto">The updated administrator data.</param>
     /// <returns>The updated administrator or error/404 responses.</returns>
     /// <response code="200">Returns the updated administrator.</response>
     /// <response code="400">Returns validation errors if the request model is invalid.</response>
@@ -107,7 +108,6 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
     /// <response code="403">Returns forbidden if not authorized as Admin.</response>
     /// <response code="404">Returns not found if the administrator does not exist.</response>
     /// <response code="409">Returns conflict if there's a business logic violation.</response>
-    [Authorize(Roles = "Admin")]
     [HttpPut("update/{id:guid}")]
     [ProducesResponseType<GetAdminDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -115,14 +115,14 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<GetAdminDto>> UpdateAdmin(Guid id, [FromBody] UpdateAdminDto dto)
+    public async Task<ActionResult<GetAdminDto>> UpdateAdmin(Guid id, [FromBody] UpdateAdminDto updateAdminDto)
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
 
         try
         {
-            var updatedAdmin = await adminRepo.UpdateAsync(id, dto);
+            var updatedAdmin = await adminRepo.UpdateAsync(id, updateAdminDto);
 
             if (updatedAdmin == null)
                 return NotFound(new ErrorResponse { Message = $"Admin with ID {id} not found" });
@@ -145,7 +145,6 @@ public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerB
     /// <response code="401">Returns unauthorized if not authenticated.</response>
     /// <response code="403">Returns forbidden if not authorized as Admin.</response>
     /// <response code="404">Returns not found if the administrator does not exist.</response>
-    [Authorize(Roles = "Admin")]
     [HttpDelete("delete/{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

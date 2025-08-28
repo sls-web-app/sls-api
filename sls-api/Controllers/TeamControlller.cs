@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using sls_borders.DTO.Team;
+using sls_borders.DTO.TeamDto;
 using sls_borders.Repositories;
 using AutoMapper;
 using sls_borders.DTO.ErrorDto;
 using sls_borders.Enums;
+using sls_borders.Models;
 
 namespace sls_api.Controllers;
 
@@ -49,32 +50,9 @@ public class TeamController(ITeamRepo teamRepo, IMapper mapper, IImageService im
     }
 
     /// <summary>
-    /// Retrieves information about tournaments in which the specified team has participated.
-    /// </summary>
-    /// <param name="id">The unique identifier of the team.</param>
-    /// <returns>A list of tournaments or a 404 error if the team does not exist.</returns>
-    /// <response code="200">Returns the list of tournaments for the team.</response>
-    /// <response code="404">Returns not found if the team does not exist.</response>
-    [HttpGet("get-tournaments/{id:guid}")]
-    [ProducesResponseType<GetTeamTournamentsDto>(StatusCodes.Status200OK)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<GetTeamTournamentsDto>> GetTeamTournaments(Guid id)
-    {
-        try
-        {
-            var team = await teamRepo.GetTeamTournamentsInfo(id);
-            return Ok(mapper.Map<GetTeamTournamentsDto>(team));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new ErrorResponse { Message = ex.Message });
-        }
-    }
-
-    /// <summary>
     /// Creates a new team in the system.
     /// </summary>
-    /// <param name="dto">The team data for creation.</param>
+    /// <param name="createTeamDto">The team data for creation.</param>
     /// <param name="avatar">The team avatar image file (optional).</param>
     /// <returns>The created team or validation errors.</returns>
     /// <response code="201">Returns the newly created team.</response>
@@ -83,19 +61,21 @@ public class TeamController(ITeamRepo teamRepo, IMapper mapper, IImageService im
     [Consumes("multipart/form-data")]
     [ProducesResponseType<GetTeamDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateTeam([FromForm] CreateTeamDto dto, [FromForm] IFormFile? avatar)
+    public async Task<IActionResult> CreateTeam([FromForm] CreateTeamDto createTeamDto, IFormFile? avatar)
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
 
+        var team = mapper.Map<Team>(createTeamDto);
+        
         // Handle avatar upload if provided
         if (avatar != null)
         {
             using var stream = avatar.OpenReadStream();
             var uploadResult = await imageService.UploadImageAsync(
-                stream, 
-                avatar.FileName, 
-                avatar.ContentType, 
+                stream,
+                avatar.FileName,
+                avatar.ContentType,
                 ImageCategory.Avatar);
 
             if (!uploadResult.Success)
@@ -104,10 +84,10 @@ public class TeamController(ITeamRepo teamRepo, IMapper mapper, IImageService im
             }
 
             // Set the image URL in the DTO
-            dto.Img = uploadResult.ImageUrl;
+            team.Img = uploadResult.ImageUrl;
         }
 
-        var createdTeam = await teamRepo.CreateAsync(dto);
+        var createdTeam = await teamRepo.CreateAsync(team);
         return CreatedAtAction(nameof(GetTeamById), new { id = createdTeam.Id }, mapper.Map<GetTeamDto>(createdTeam));
     }
 

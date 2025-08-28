@@ -1,21 +1,49 @@
-using sls_borders.DTO.Game;
-using sls_borders.DTO.Team;
 using sls_borders.Enums;
 
 namespace sls_borders.DTO.UserDto;
 
+/// <summary>
+/// Data Transfer Object for updating a user.
+/// </summary>
 public class UpdateUserDto
 {
-    public string Email { get; set; } = null!;
-    public string Password { get; set; } = null!;
-    public string ProfileImg { get; set; } = null!;
-    public string Name { get; set; } = null!;
-    public string Surname { get; set; } = null!;
-    public string? ClassName { get; set; }
-    public Role Role { get; set; } = Role.user;
+    /// <summary>
+    /// Gets or sets the email address of the user.
+    /// </summary>
+    public string? Email { get; set; }
 
-    public Guid TeamId { get; set; } = Guid.Empty;
-    public GetTeamDto Team { get; set; } = null!;
-    public ICollection<Models.Game> GamesAsWhite { get; set; } = new List<Models.Game>();
-    public ICollection<Models.Game> GamesAsBlack { get; set; } = new List<Models.Game>();
+    /// <summary>
+    /// Gets or sets the password of the user.
+    /// </summary>
+    public string? Password { get; set; }
+
+    /// <summary>
+    /// Gets or sets the profile image URL of the user.
+    /// </summary>
+    public string? ProfileImg { get; set; }
+
+    /// <summary>
+    /// Gets or sets the first name of the user.
+    /// </summary>
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Gets or sets the surname of the user.
+    /// </summary>
+    public string? Surname { get; set; }
+
+    /// <summary>
+    /// Gets or sets the class name of the user.
+    /// </summary>
+    public string? ClassName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the role of the user.
+    /// </summary>
+    public Role? Role { get; set; }
+
+    /// <summary>
+    /// Gets or sets the team ID of the user.
+    /// </summary>
+    public Guid? TeamId { get; set; }
 }

@@ -1,14 +1,9 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using sls_borders.DTO.Admin;
 using sls_borders.DTO.EditionDto;
 using sls_borders.DTO.ErrorDto;
-using sls_borders.DTO.Game;
 using sls_borders.Models;
 using sls_borders.Repositories;
-using sls_repos.Repositories;
 
 namespace sls_api.Controllers
 {
@@ -50,7 +45,8 @@ namespace sls_api.Controllers
 
             try
             {
-                var createdEdition = await editionRepo.CreateAsync(createEditionDto);
+                var edition = mapper.Map<Edition>(createEditionDto);
+                var createdEdition = await editionRepo.CreateAsync(edition);
                 return CreatedAtAction(nameof(GetEditionById), new { id = createdEdition.Id }, mapper.Map<GetEditionDto>(createdEdition));
             }
             catch (InvalidOperationException ex)

@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using sls_borders.DTO.Game;
+using sls_borders.DTO.GameDto;
 using sls_borders.Repositories;
 using AutoMapper;
 using sls_borders.DTO.ErrorDto;
+using sls_borders.Models;
 
 namespace sls_api.Controllers;
 
@@ -47,7 +48,7 @@ public class GameController(IGameRepo gameRepo, IMapper mapper) : ControllerBase
     /// <summary>
     /// Creates a new game in the system.
     /// </summary>
-    /// <param name="dto">The game data for creation.</param>
+    /// <param name="createGameDto">The game data for creation.</param>
     /// <returns>The created game or validation/conflict errors.</returns>
     /// <response code="201">Returns the newly created game.</response>
     /// <response code="400">Returns validation errors if the request model is invalid.</response>
@@ -56,14 +57,15 @@ public class GameController(IGameRepo gameRepo, IMapper mapper) : ControllerBase
     [ProducesResponseType<GetGameDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<GetGameDto>> CreateGame([FromBody] CreateGameDto dto)
+    public async Task<ActionResult<GetGameDto>> CreateGame([FromBody] CreateGameDto createGameDto)
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
 
         try
         {
-            var createdGame = await gameRepo.CreateAsync(dto);
+            var game = mapper.Map<Game>(createGameDto);
+            var createdGame = await gameRepo.CreateAsync(game);
             return CreatedAtAction(nameof(GetGameById), new { id = createdGame.Id }, mapper.Map<GetGameDto>(createdGame));
         }
         catch (InvalidOperationException ex)
@@ -76,7 +78,7 @@ public class GameController(IGameRepo gameRepo, IMapper mapper) : ControllerBase
     /// Updates an existing game with new data.
     /// </summary>
     /// <param name="id">The unique identifier of the game to update.</param>
-    /// <param name="dto">The updated game data.</param>
+    /// <param name="updateGameDto">The updated game data.</param>
     /// <returns>The updated game or a 404 error if not found.</returns>
     /// <response code="200">Returns the updated game.</response>
     /// <response code="400">Returns validation errors if the request model is invalid.</response>
@@ -87,14 +89,14 @@ public class GameController(IGameRepo gameRepo, IMapper mapper) : ControllerBase
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<GetGameDto>> UpdateGame(Guid id, [FromBody] UpdateGameDto dto)
+    public async Task<ActionResult<GetGameDto>> UpdateGame(Guid id, [FromBody] UpdateGameDto updateGameDto)
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
 
         try
         {
-            var updatedGame = await gameRepo.UpdateAsync(id, dto);
+            var updatedGame = await gameRepo.UpdateAsync(id, updateGameDto);
 
             if (updatedGame == null)
                 return NotFound(new ErrorResponse { Message = $"Game with ID {id} not found" });

@@ -1,16 +1,32 @@
-using sls_borders.DTO.TournamentDto;
-using sls_borders.DTO.UserDto;
+namespace sls_borders.DTO.TeamDto;
 
-namespace sls_borders.DTO.Team;
-
+/// <summary>
+/// Data Transfer Object for returning team information.
+/// </summary>
 public class GetTeamDto
 {
+    /// <summary>
+    /// Gets or sets the unique identifier of the team.
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// Gets or sets the name of the team.
+    /// </summary>
     public string Name { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the short name or abbreviation of the team.
+    /// </summary>
     public string Short { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the address of the team.
+    /// </summary>
     public string Address { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the image URL of the team.
+    /// </summary>
     public string Img { get; set; } = null!;
-
-    public ICollection<GetUserDto> Users { get; set; } = new List<GetUserDto>();
-
 }

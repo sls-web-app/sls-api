@@ -7,8 +7,8 @@ namespace sls_borders.Repositories
     {
         Task<List<Tournament>> GetAllAsync();
         Task<Tournament?> GetByIdAsync(Guid id);
-        Task<Tournament> CreateAsync(CreateTournamentDto tournament);
-        Task<Tournament?> UpdateAsync(Guid id, UpdateTournamentDto tournament);
+        Task<Tournament> CreateAsync(Tournament tournament);
+        Task<Tournament?> UpdateAsync(Guid id, UpdateTournamentDto updateTournamentDto);
         Task<bool> DeleteAsync(Guid id);
     }
 }
