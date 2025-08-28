@@ -10,6 +10,7 @@ public class UpdateTournamentDto
     public DateTime? Date { get; set; }
     public int? Round { get; set; }
     public TournamentStatus? Status { get; set; }
+    public TournamentType? Type { get; set; }
     public Guid? OrganizingTeamId { get; set; }
     public Guid? EditionId { get; set; }
 }

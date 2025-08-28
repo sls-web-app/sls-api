@@ -48,6 +48,8 @@ public class TournamentRepo(ApplicationDbContext context) : ITournamentRepo
             existingTournament.OrganizingTeamId = updateDto.OrganizingTeamId.Value;
         if(updateDto.EditionId.HasValue)
             existingTournament.EditionId = updateDto.EditionId.Value;
+        if(updateDto.Type.HasValue)
+            existingTournament.Type = updateDto.Type.Value;
 
         await context.SaveChangesAsync();
         return existingTournament;

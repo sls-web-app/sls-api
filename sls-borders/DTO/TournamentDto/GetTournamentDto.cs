@@ -11,6 +11,7 @@ public class GetTournamentDto
     public DateTime Date { get; set; }
     public int? Round { get; set; }
     public TournamentStatus Status { get; set; } = TournamentStatus.Upcoming;
+    public TournamentType Type { get; set; }
     public Guid OrganizingTeamId { get; set; } = Guid.Empty;
     public Guid EditionId { get; set; } = Guid.Empty;
 }

@@ -25,16 +25,14 @@ public class UserRepo(ApplicationDbContext context) : IUserRepo
     public async Task<List<User>> GetAllAsync()
     {
         return await context.Users
-            .Include(u => u.GamesAsWhite)
-            .Include(u => u.GamesAsBlack)
+            .Include(u => u.Team)
             .ToListAsync();
     }
 
     public async Task<User?> GetByIdAsync(Guid id)
     {
         return await context.Users
-            .Include(u => u.GamesAsWhite)
-            .Include(u => u.GamesAsBlack)
+            .Include(u => u.Team)
             .FirstOrDefaultAsync(u => u.Id == id);
     }
 
