@@ -5,13 +5,6 @@ namespace sls_borders.Enums;
 /// </summary>
 public enum ImageCategory
 {
-    /// <summary>
-    /// Indicates that the image is an avatar.
-    /// </summary>
     Avatar,
-
-    /// <summary>
-    /// Indicates that the image is a general image.
-    /// </summary>
     Image
 }
