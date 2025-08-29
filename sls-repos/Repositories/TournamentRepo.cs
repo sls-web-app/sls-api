@@ -44,8 +44,6 @@ public class TournamentRepo(ApplicationDbContext context) : ITournamentRepo
             existingTournament.Round = updateDto.Round;
         if(updateDto.Status.HasValue)
             existingTournament.Status = updateDto.Status.Value;
-        if(updateDto.OrganizingTeamId.HasValue)
-            existingTournament.OrganizingTeamId = updateDto.OrganizingTeamId.Value;
         if(updateDto.EditionId.HasValue)
             existingTournament.EditionId = updateDto.EditionId.Value;
         if(updateDto.Type.HasValue)
