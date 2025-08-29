@@ -7,7 +7,7 @@ using sls_borders.Repositories;
 
 namespace sls_repos.Repositories;
 
-public class TournamentRepo(ApplicationDbContext context) : ITournamentRepo
+public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITournamentRepo
 {
     public async Task<List<Tournament>> GetAllAsync()
     {
@@ -35,35 +35,29 @@ public class TournamentRepo(ApplicationDbContext context) : ITournamentRepo
             .ToListAsync();
     }
 
-    public async Task<Tournament> CreateAsync(Tournament tournament)
+    public async Task<Tournament?> CreateAsync(Tournament tournament)
     {
+        var currentEdition = await context.Editions.Where(e => e.IsActive).FirstOrDefaultAsync();
+
+        if (currentEdition == null)
+            return null;
+
+        tournament.EditionId = currentEdition.Id;
+
         context.Tournaments.Add(tournament);
         await context.SaveChangesAsync();
 
         return tournament;
     }
 
-    public async Task<Tournament?> UpdateAsync(Guid id, UpdateTournamentDto updateDto)
+    public async Task<Tournament?> UpdateAsync(Guid id, UpdateTournamentDto tournamentDto)
     {
         var existingTournament = await context.Tournaments.FindAsync(id);
 
         if (existingTournament == null)
             return null;
 
-        if(!string.IsNullOrEmpty(updateDto.Name))
-            existingTournament.Name = updateDto.Name;
-        if(updateDto.Date.HasValue)
-            existingTournament.Date = updateDto.Date.Value;
-        if(updateDto.Round.HasValue)
-            existingTournament.Round = updateDto.Round;
-        if(!string.IsNullOrEmpty(updateDto.Location))
-            existingTournament.Location = updateDto.Location;
-        if (updateDto.Status.HasValue)
-                existingTournament.Status = updateDto.Status.Value;
-        if(updateDto.Type.HasValue)
-            existingTournament.Type = updateDto.Type.Value;
-        if(updateDto.EditionId.HasValue)
-            existingTournament.EditionId = updateDto.EditionId.Value;
+        mapper.Map(tournamentDto, existingTournament);
 
         await context.SaveChangesAsync();
         return existingTournament;

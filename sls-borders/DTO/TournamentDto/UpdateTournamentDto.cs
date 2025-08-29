@@ -13,5 +13,5 @@ public class UpdateTournamentDto
     public string? Location { get; set; }
     public TournamentStatus? Status { get; set; }
     public TournamentType? Type { get; set; }
-    public Guid? EditionId { get; set; }
+    public string? Description { get; set; }
 }

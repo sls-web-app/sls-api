@@ -87,6 +87,10 @@ public class TournamentController(ITournamentRepo tournamentRepo, IMapper mapper
         {
             var tournament = mapper.Map<Tournament>(createTournamentDto);
             var createdTournament = await tournamentRepo.CreateAsync(tournament);
+
+            if (createdTournament == null)
+                return Problem("Nie uda³o siê utworzyæ turnieju.", statusCode: StatusCodes.Status500InternalServerError);
+
             return CreatedAtAction(nameof(GetTournamentById), new { id = createdTournament.Id }, mapper.Map<GetTournamentDto>(createdTournament));
         }
         catch (KeyNotFoundException ex)

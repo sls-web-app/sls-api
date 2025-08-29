@@ -20,5 +20,7 @@ public class TournamentProfile : Profile
         // Maps from the main entity to the data transfer object for retrieval.
         // This will automatically handle mapping the collections of Teams and Games.
         CreateMap<Tournament, GetTournamentDto>();
+
+        CreateMap<UpdateTournamentDto, Tournament>();
     }
 }

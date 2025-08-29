@@ -14,4 +14,5 @@ public class GetTournamentDto
     public string? Location { get; set; }
     public TournamentStatus Status { get; set; } = TournamentStatus.Upcoming;
     public TournamentType Type { get; set; }
+    public string? Description { get; set; }
 }

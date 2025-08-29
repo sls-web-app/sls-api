@@ -14,6 +14,7 @@ public class Tournament
     public string? Location { get; set; }
     public TournamentStatus Status { get; set; } = TournamentStatus.Upcoming;
     public TournamentType Type { get; set; }
+    public string? Description { get; set; }
 
     public Guid EditionId { get; set; } = Guid.Empty;
 
