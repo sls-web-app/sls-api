@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using sls_borders.Data;
 using sls_borders.Models;
-using sls_borders.DTO.Admin;
 using sls_repos.Repositories;
 using AutoMapper;
+using sls_borders.DTO.AdminDto;
 
 namespace Tests;
 
@@ -26,7 +26,7 @@ public class AdminRepoTest
         });
         _mapper = mapperConfig.CreateMapper();
 
-        _adminRepo = new AdminRepo(_context, _mapper);
+        _adminRepo = new AdminRepo(_context);
     }
 
     [Fact]
