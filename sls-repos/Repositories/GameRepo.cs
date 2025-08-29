@@ -79,6 +79,20 @@ public class GameRepo(ApplicationDbContext context, IMapper mapper) : IGameRepo
                 throw new InvalidOperationException($"Black player with ID {gameDto.BlackPlayerId} not found.");
         }
 
+        if (existingGame.WhiteTeamId != gameDto.WhiteTeamId)
+        {
+            var whiteTeam = await context.Teams.FindAsync(gameDto.WhiteTeamId);
+            if (whiteTeam == null)
+                throw new InvalidOperationException($"White team with ID {gameDto.WhiteTeamId} not found.");
+        }
+
+        if (existingGame.BlackTeamId != gameDto.BlackTeamId)
+        {
+            var blackTeam = await context.Teams.FindAsync(gameDto.BlackTeamId);
+            if (blackTeam == null)
+                throw new InvalidOperationException($"Black team with ID {gameDto.BlackTeamId} not found.");
+        }
+
         mapper.Map(gameDto, existingGame);
         await context.SaveChangesAsync();
 

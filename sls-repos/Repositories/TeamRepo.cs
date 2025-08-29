@@ -7,7 +7,7 @@ using sls_borders.Repositories;
 
 namespace sls_repos.Repositories;
 
-public class TeamRepo(ApplicationDbContext context) : ITeamRepo
+public class TeamRepo(ApplicationDbContext context, IMapper mapper) : ITeamRepo
 {
     public async Task<List<Team>> GetAllAsync()
     {
@@ -34,17 +34,7 @@ public class TeamRepo(ApplicationDbContext context) : ITeamRepo
         if (existingTeam == null)
             return null;
         
-        if(!string.IsNullOrEmpty(updateTeamDto.Name))
-            existingTeam.Name = updateTeamDto.Name;
-        
-        if(!string.IsNullOrEmpty(updateTeamDto.Short))
-            existingTeam.Short = updateTeamDto.Short;
-        
-        if(!string.IsNullOrEmpty(updateTeamDto.Address))
-            existingTeam.Address = updateTeamDto.Address;
-        
-        if(!string.IsNullOrEmpty(updateTeamDto.Img))
-            existingTeam.Img = updateTeamDto.Img;
+        mapper.Map(updateTeamDto, existingTeam);
 
         await context.SaveChangesAsync();
         return existingTeam;
