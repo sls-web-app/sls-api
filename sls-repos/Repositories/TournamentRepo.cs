@@ -23,6 +23,18 @@ public class TournamentRepo(ApplicationDbContext context) : ITournamentRepo
             .FirstOrDefaultAsync(t => t.Id == id);
     }
 
+    public async Task<List<Tournament>?> GetAllCurrentEditionTournamentsAsync()
+    {
+        var currentEdition = await context.Editions.Where(e => e.IsActive).FirstOrDefaultAsync();
+
+        if (currentEdition == null)
+            return null;
+
+        return await context.Tournaments
+            .Where(t => t.EditionId == currentEdition.Id)
+            .ToListAsync();
+    }
+
     public async Task<Tournament> CreateAsync(Tournament tournament)
     {
         context.Tournaments.Add(tournament);

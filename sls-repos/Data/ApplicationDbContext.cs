@@ -40,12 +40,6 @@ namespace sls_borders.Data
                     v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
                 );
 
-                //One-to-many relationship with Users
-                entity.HasMany(t => t.Users)
-                    .WithOne(u => u.Team)
-                    .HasForeignKey(u => u.TeamId)
-                    .OnDelete(DeleteBehavior.SetNull);
-
                 //Many-to-many relationship with Editions
                 entity.HasMany(t => t.Editions)
                     .WithMany(e => e.Teams)
@@ -68,18 +62,6 @@ namespace sls_borders.Data
                 entity.HasOne(u => u.Team)
                     .WithMany(t => t.Users)
                     .HasForeignKey(u => u.TeamId)
-                    .OnDelete(DeleteBehavior.SetNull);
-
-                //One-to-many relationship with Games as White Player
-                entity.HasMany(u => u.GamesAsWhite)
-                    .WithOne(g => g.WhitePlayer)
-                    .HasForeignKey(g => g.WhitePlayerId)
-                    .OnDelete(DeleteBehavior.SetNull);
-
-                //One-to-many relationship with Games as Black Player
-                entity.HasMany(u => u.GamesAsBlack)
-                    .WithOne(g => g.BlackPlayer)
-                    .HasForeignKey(g => g.BlackPlayerId)
                     .OnDelete(DeleteBehavior.SetNull);
             });
 
@@ -129,13 +111,13 @@ namespace sls_borders.Data
 
                 //Many-to-one relationship with White Team
                 entity.HasOne(g => g.WhiteTeam)
-                    .WithMany()
+                    .WithMany(t => t.GamesAsWhite)
                     .HasForeignKey(g => g.WhiteTeamId)
                     .OnDelete(DeleteBehavior.SetNull);
 
                 //Many-to-one relationship with Black Team
                 entity.HasOne(g => g.BlackTeam)
-                    .WithMany()
+                    .WithMany(t => t.GamesAsBlack)
                     .HasForeignKey(g => g.BlackTeamId)
                     .OnDelete(DeleteBehavior.SetNull);
             });
@@ -167,7 +149,7 @@ namespace sls_borders.Data
                     .WithOne(t => t.Edition)
                     .HasForeignKey(t => t.EditionId)
                     .OnDelete(DeleteBehavior.SetNull);
-                
+
                 //Many-to-many relationship with Teams
                 entity.HasMany(e => e.Teams)
                     .WithMany(t => t.Editions)
@@ -178,6 +160,12 @@ namespace sls_borders.Data
             {
                 entity.HasKey(ui => ui.Id);
                 entity.Property(ui => ui.UserId).IsRequired();
+
+                //One-to-one relationship with User
+                entity.HasOne(ui => ui.User)
+                    .WithOne(u => u.Invite)
+                    .HasForeignKey<UserInvite>(ui => ui.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             base.OnModelCreating(modelBuilder);
