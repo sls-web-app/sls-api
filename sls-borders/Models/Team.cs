@@ -14,4 +14,6 @@ public class Team
 
     public ICollection<User> Users { get; set; } = [];
     public ICollection<Edition> Editions { get; set; } = [];
+    public ICollection<Game> GamesAsWhite { get; set; } = [];
+    public ICollection<Game> GamesAsBlack { get; set; } = [];
 }

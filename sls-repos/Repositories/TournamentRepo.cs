@@ -23,6 +23,18 @@ public class TournamentRepo(ApplicationDbContext context) : ITournamentRepo
             .FirstOrDefaultAsync(t => t.Id == id);
     }
 
+    public async Task<List<Tournament>?> GetAllCurrentEditionTournamentsAsync()
+    {
+        var currentEdition = await context.Editions.Where(e => e.IsActive).FirstOrDefaultAsync();
+
+        if (currentEdition == null)
+            return null;
+
+        return await context.Tournaments
+            .Where(t => t.EditionId == currentEdition.Id)
+            .ToListAsync();
+    }
+
     public async Task<Tournament> CreateAsync(Tournament tournament)
     {
         context.Tournaments.Add(tournament);
@@ -38,16 +50,20 @@ public class TournamentRepo(ApplicationDbContext context) : ITournamentRepo
         if (existingTournament == null)
             return null;
 
+        if(!string.IsNullOrEmpty(updateDto.Name))
+            existingTournament.Name = updateDto.Name;
         if(updateDto.Date.HasValue)
             existingTournament.Date = updateDto.Date.Value;
         if(updateDto.Round.HasValue)
             existingTournament.Round = updateDto.Round;
-        if(updateDto.Status.HasValue)
-            existingTournament.Status = updateDto.Status.Value;
-        if(updateDto.EditionId.HasValue)
-            existingTournament.EditionId = updateDto.EditionId.Value;
+        if(!string.IsNullOrEmpty(updateDto.Location))
+            existingTournament.Location = updateDto.Location;
+        if (updateDto.Status.HasValue)
+                existingTournament.Status = updateDto.Status.Value;
         if(updateDto.Type.HasValue)
             existingTournament.Type = updateDto.Type.Value;
+        if(updateDto.EditionId.HasValue)
+            existingTournament.EditionId = updateDto.EditionId.Value;
 
         await context.SaveChangesAsync();
         return existingTournament;

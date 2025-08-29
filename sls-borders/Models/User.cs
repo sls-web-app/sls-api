@@ -21,8 +21,9 @@ public class User
     public string PasswordHash { get; set; } = null!;
     public string PasswordSalt { get; set; } = null!;
     public Guid? TeamId { get; set; }
-    public Team? Team { get; set; }
 
+    public Team? Team { get; set; }
+    public UserInvite? Invite { get; set; }
     public ICollection<Game> GamesAsWhite { get; set; } = new List<Game>();
     public ICollection<Game> GamesAsBlack { get; set; } = new List<Game>();
 }

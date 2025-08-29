@@ -49,6 +49,24 @@ public class TournamentController(ITournamentRepo tournamentRepo, IMapper mapper
     }
 
     /// <summary>
+    /// Retrieves all tournaments associated with the current active edition.
+    /// </summary>
+    /// <returns>A collection of tournaments for the current edition or a 404 error if no active edition exists.</returns>
+    /// <response code="200">Returns the list of tournaments for the current edition.</response>
+    /// <response code="404">Returns not found if there is no active edition.</response>
+    [HttpGet("get-all-curent-edition-tournaments")]
+    [ProducesResponseType<IEnumerable<GetTournamentDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IEnumerable<GetTournamentDto>>> GetAllCurrentEditionTournaments()
+    {
+        var tournaments = await tournamentRepo.GetAllCurrentEditionTournamentsAsync();
+        if(tournaments == null)
+            return NotFound(new ErrorResponse { Message = "No active edition found." });
+
+        return Ok(mapper.Map<List<GetTournamentDto>>(tournaments));
+    }
+
+    /// <summary>
     /// Creates a new tournament in the system.
     /// </summary>
     /// <param name="createTournamentDto">The tournament data for creation.</param>
