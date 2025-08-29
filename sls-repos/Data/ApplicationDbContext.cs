@@ -77,12 +77,6 @@ namespace sls_borders.Data
                     .WithMany(e => e.Tournaments)
                     .HasForeignKey(t => t.EditionId)
                     .OnDelete(DeleteBehavior.SetNull);
-                
-                //One-to-many relationship with Games
-                entity.HasMany(t => t.Games)
-                    .WithOne(g => g.Tournament)
-                    .HasForeignKey(g => g.TournamentId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<Game>(entity =>
@@ -143,17 +137,6 @@ namespace sls_borders.Data
                     v => v,
                     v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
                 );
-
-                //One-to-many relationship with Tournaments
-                entity.HasMany(e => e.Tournaments)
-                    .WithOne(t => t.Edition)
-                    .HasForeignKey(t => t.EditionId)
-                    .OnDelete(DeleteBehavior.SetNull);
-
-                //Many-to-many relationship with Teams
-                entity.HasMany(e => e.Teams)
-                    .WithMany(t => t.Editions)
-                    .UsingEntity(j => j.ToTable("EditionTeams"));
             });
 
             modelBuilder.Entity<UserInvite>(entity =>

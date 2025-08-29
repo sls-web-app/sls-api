@@ -50,16 +50,20 @@ public class TournamentRepo(ApplicationDbContext context) : ITournamentRepo
         if (existingTournament == null)
             return null;
 
+        if(!string.IsNullOrEmpty(updateDto.Name))
+            existingTournament.Name = updateDto.Name;
         if(updateDto.Date.HasValue)
             existingTournament.Date = updateDto.Date.Value;
         if(updateDto.Round.HasValue)
             existingTournament.Round = updateDto.Round;
-        if(updateDto.Status.HasValue)
-            existingTournament.Status = updateDto.Status.Value;
-        if(updateDto.EditionId.HasValue)
-            existingTournament.EditionId = updateDto.EditionId.Value;
+        if(!string.IsNullOrEmpty(updateDto.Location))
+            existingTournament.Location = updateDto.Location;
+        if (updateDto.Status.HasValue)
+                existingTournament.Status = updateDto.Status.Value;
         if(updateDto.Type.HasValue)
             existingTournament.Type = updateDto.Type.Value;
+        if(updateDto.EditionId.HasValue)
+            existingTournament.EditionId = updateDto.EditionId.Value;
 
         await context.SaveChangesAsync();
         return existingTournament;
