@@ -5,7 +5,7 @@ namespace sls_borders.Enums;
 /// </summary>
 public enum Role
 {
-    User,
-    Observer,
-    Admin
+    user,
+    observer,
+    admin
 }

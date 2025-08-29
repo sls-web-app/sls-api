@@ -11,7 +11,7 @@ using sls_utils.AuthUtils;
 namespace sls_api.Controllers;
 
 [ApiController]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "admin")]
 [Route("api/[controller]")]
 public class UserInviteController(IUserInviteRepo userInviteRepo, IUserRepo userRepo, IConfiguration configuration) : ControllerBase
 {
@@ -96,12 +96,14 @@ public class UserInviteController(IUserInviteRepo userInviteRepo, IUserRepo user
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
-        if(registerDto.Password == "")
+        if (registerDto.Password == "")
             return BadRequest(new ErrorResponse { Message = "Password cannot be empty" });
 
         var invite = await userInviteRepo.GetByIdAsync(inviteId);
         if (invite == null)
             return NotFound(new ErrorResponse { Message = $"Invite with ID {inviteId} not found" });
+        if (invite.ExpiresAt < DateTime.UtcNow)
+            return BadRequest(new ErrorResponse { Message = "Invite has expired" });
 
         var user = await userRepo.RegisterAsync(invite.UserId, registerDto.Password);
         var keyString = configuration["Jwt:Key"] ?? throw new ArgumentNullException("JWT key is not configured.");
@@ -109,5 +111,38 @@ public class UserInviteController(IUserInviteRepo userInviteRepo, IUserRepo user
 
         await userInviteRepo.DeleteAsync(inviteId);
         return Ok(new LoginUserResponseDto { Token = token });
+    }
+
+    [AllowAnonymous]
+    [HttpPost("resend")]
+    public async Task<ActionResult> ResendInvite([FromQuery] string email)
+    {
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
+        var user = await userRepo.GetByEmailActiveAsync(email);
+        if(user == null)
+            return NotFound(new ErrorResponse { Message = $"User with email {email} not found" });
+        if (user.AccountActivated)
+            return BadRequest(new ErrorResponse { Message = $"User with email {email} has already activated their account" });
+        if (user.Invite != null)
+            await userInviteRepo.DeleteAsync(user.Invite.Id);
+
+        var invite = new UserInvite
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+        };
+        invite = await userInviteRepo.CreateAsync(invite);
+
+        string DomainName = configuration.GetSection("WebsiteOptions")["DomainName"] ?? "localhost:3000";
+        await EmailUtils.SendRegisterEmailAsync(
+            emailConfig: configuration.GetSection("EmailSettings"),
+            toEmail: user.Email,
+            userName: $"{user.Name} {user.Surname}",
+            PasswordSetupUrl: $"https://{DomainName}/auth/registration/{invite.Id}"
+        );
+
+        return Ok(new { Message = $"Invite resent to {email}" });
     }
 }

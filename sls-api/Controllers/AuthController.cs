@@ -39,7 +39,7 @@ public class AuthController(IAdminRepo adminRepo, IUserRepo userRepo, IConfigura
         if (admin == null) return Unauthorized(new ErrorResponse { Message = "Invalid username or password" });
 
         var keyString = configuration["Jwt:Key"] ?? throw new ArgumentNullException("JWT key is not configured.");
-        string token = JwtUtils.GenerateJwtToken(admin.Id, admin.Username, Role.Admin, keyString);
+        string token = JwtUtils.GenerateJwtToken(admin.Id, admin.Username, Role.admin, keyString);
         return Ok(new LoginAdminResponseDto { Token = token });
     }
 

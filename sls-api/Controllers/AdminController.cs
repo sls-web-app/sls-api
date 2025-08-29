@@ -14,7 +14,7 @@ namespace sls_api.Controllers;
 /// All operations require Admin role authorization.
 /// </summary>
 [ApiController]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "admin")]
 [Route("api/[controller]")]
 public class AdminController(IAdminRepo adminRepo, IMapper mapper) : ControllerBase
 {
