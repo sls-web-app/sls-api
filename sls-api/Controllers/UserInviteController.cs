@@ -11,7 +11,7 @@ using sls_utils.AuthUtils;
 namespace sls_api.Controllers;
 
 [ApiController]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "admin")]
 [Route("api/[controller]")]
 public class UserInviteController(IUserInviteRepo userInviteRepo, IUserRepo userRepo, IConfiguration configuration) : ControllerBase
 {
@@ -115,12 +115,12 @@ public class UserInviteController(IUserInviteRepo userInviteRepo, IUserRepo user
 
     [AllowAnonymous]
     [HttpPost("resend")]
-    public async Task<ActionResult> ResendInvite([FromBody] string email)
+    public async Task<ActionResult> ResendInvite([FromQuery] string email)
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
 
-        var user = await userRepo.GetByEmailAsync(email);
+        var user = await userRepo.GetByEmailActiveAsync(email);
         if(user == null)
             return NotFound(new ErrorResponse { Message = $"User with email {email} not found" });
         if (user.AccountActivated)
@@ -140,7 +140,7 @@ public class UserInviteController(IUserInviteRepo userInviteRepo, IUserRepo user
             emailConfig: configuration.GetSection("EmailSettings"),
             toEmail: user.Email,
             userName: $"{user.Name} {user.Surname}",
-            PasswordSetupUrl: $"https://{DomainName}/setup-password/{invite.Id}"
+            PasswordSetupUrl: $"https://{DomainName}/auth/registration/{invite.Id}"
         );
 
         return Ok(new { Message = $"Invite resent to {email}" });

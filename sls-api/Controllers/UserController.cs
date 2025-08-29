@@ -154,7 +154,7 @@ public class UserController(IUserRepo userRepo, ApplicationDbContext dbContext, 
     /// <response code="403">Returns forbidden if not authorized as Admin.</response>
     /// <response code="404">Returns not found if the user does not exist.</response>
     [HttpDelete("delete/{id:guid}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]

@@ -107,6 +107,15 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
             .FirstOrDefaultAsync(u => u.Email == email);
     }
     
+    public async Task<User?> GetByEmailActiveAsync(string email)
+    {
+        return await context.Users
+            .Where(u => u.AccountActivated == false)
+            .Include(u => u.GamesAsWhite)
+            .Include(u => u.GamesAsBlack)
+            .FirstOrDefaultAsync(u => u.Email == email);
+    }   
+
     public async Task<User> RegisterAsync(Guid userId, string password)
     {
         var user = await GetByIdAsync(userId);

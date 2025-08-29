@@ -13,6 +13,7 @@ namespace sls_borders.Repositories
 
         Task<bool> EmailExistsAsync(string email);
         Task<User?> GetByEmailAsync(string email);
+        Task<User?> GetByEmailActiveAsync(string email);
         Task<User?> LoginAsync(string email, string password);
         Task<User> RegisterAsync(Guid userId, string password);
     }
