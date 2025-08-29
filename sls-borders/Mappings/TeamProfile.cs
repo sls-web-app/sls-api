@@ -18,5 +18,7 @@ public class TeamProfile : Profile
         // The repository is responsible for handling relationships and image, so we ignore them here.
         CreateMap<CreateTeamDto, Team>()
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
+
+        CreateMap<UpdateTeamDto, Team>();
     }
 }

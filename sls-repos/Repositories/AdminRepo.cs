@@ -66,10 +66,9 @@ public class AdminRepo(ApplicationDbContext context) : IAdminRepo
             {
                 throw new InvalidOperationException($"Username '{adminDto.Username}' is already taken.");
             }
-
-            existingAdmin.Username = adminDto.Username;
         }
 
+        existingAdmin.Username = adminDto.Username;
 
         if (!string.IsNullOrEmpty(adminDto.Password))
         {

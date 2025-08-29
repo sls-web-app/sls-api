@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using sls_borders.Data;
 using sls_borders.DTO.UserDto;
@@ -8,7 +9,7 @@ using sls_utils.AuthUtils;
 
 namespace sls_repos.Repositories;
 
-public class UserRepo(ApplicationDbContext context) : IUserRepo
+public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
 {
     public async Task<User?> LoginAsync(string email, string password)
     {
@@ -58,7 +59,7 @@ public class UserRepo(ApplicationDbContext context) : IUserRepo
 
         if (existingUser == null) return null;
 
-        if(!string.IsNullOrEmpty(updateUserDto.Email))
+        if (!string.IsNullOrEmpty(updateUserDto.Email))
         {
             var emailExists = await EmailExistsAsync(updateUserDto.Email);
             if (emailExists)
@@ -74,24 +75,7 @@ public class UserRepo(ApplicationDbContext context) : IUserRepo
             existingUser.PasswordSalt = passwordSalt;
         }
 
-        if (!string.IsNullOrEmpty(updateUserDto.ProfileImg))
-            existingUser.ProfileImg = updateUserDto.ProfileImg;
-        if (!string.IsNullOrEmpty(updateUserDto.Name))
-            existingUser.Name = updateUserDto.Name;
-        if (!string.IsNullOrEmpty(updateUserDto.Surname))
-            existingUser.Surname = updateUserDto.Surname;
-        if (!string.IsNullOrEmpty(updateUserDto.ClassName))
-            existingUser.ClassName = updateUserDto.ClassName;
-        if (updateUserDto.Role.HasValue)
-            existingUser.Role = (Role)updateUserDto.Role;
-        if (updateUserDto.AccountActivated.HasValue)
-            existingUser.AccountActivated = updateUserDto.AccountActivated.Value;
-        if (updateUserDto.IsInPlay.HasValue)
-            existingUser.IsInPlay = updateUserDto.IsInPlay.Value;
-        if (updateUserDto.IsLider.HasValue)
-            existingUser.IsLider = updateUserDto.IsLider.Value;
-        if (updateUserDto.TeamId.HasValue)
-                existingUser.TeamId = updateUserDto.TeamId;
+        mapper.Map(updateUserDto, existingUser);
 
         context.Users.Update(existingUser);
         await context.SaveChangesAsync();

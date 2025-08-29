@@ -17,5 +17,7 @@ public class GameProfile : Profile
         // CreateGameDto -> Game
         CreateMap<CreateGameDto, Game>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
+        
+        CreateMap<UpdateGameDto, Game>();
     }
 }
