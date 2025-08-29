@@ -7,10 +7,11 @@ namespace sls_borders.DTO.TournamentDto;
 /// </summary>
 public class UpdateTournamentDto
 {
+    public string? Name { get; set; }
     public DateTime? Date { get; set; }
     public int? Round { get; set; }
+    public string? Location { get; set; }
     public TournamentStatus? Status { get; set; }
     public TournamentType? Type { get; set; }
-    public Guid? OrganizingTeamId { get; set; }
     public Guid? EditionId { get; set; }
 }
