@@ -2,7 +2,6 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using sls_borders.Data;
 using sls_borders.DTO.UserDto;
-using sls_borders.Enums;
 using sls_borders.Models;
 using sls_borders.Repositories;
 using sls_utils.AuthUtils;
@@ -15,7 +14,7 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
     {
         var user = await GetByEmailAsync(email);
 
-        if (user == null) return null;
+        if (user == null || !user.AccountActivated) return null;
 
         string computedHash = HashingUtils.HashPassword(password, user.PasswordSalt).Hash;
         if (computedHash != user.PasswordHash) return null;
@@ -139,19 +138,9 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
     public async Task<User?> GetByEmailAsync(string email)
     {
         return await context.Users
-            .Include(u => u.GamesAsWhite)
-            .Include(u => u.GamesAsBlack)
+            .Include(ui => ui.Invite)
             .FirstOrDefaultAsync(u => u.Email == email);
     }
-    
-    public async Task<User?> GetByEmailActiveAsync(string email)
-    {
-        return await context.Users
-            .Where(u => u.AccountActivated == false)
-            .Include(u => u.GamesAsWhite)
-            .Include(u => u.GamesAsBlack)
-            .FirstOrDefaultAsync(u => u.Email == email);
-    }   
 
     public async Task<User> RegisterAsync(Guid userId, string password)
     {
@@ -169,6 +158,20 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
         await context.SaveChangesAsync();
 
         return user;
+    }
+
+    public async Task<bool> DeactivateAccountAsync(Guid userId)
+    {
+        var user = await GetByIdAsync(userId);
+        if (user == null)
+            throw new KeyNotFoundException($"User with ID {userId} was not found.");
+
+        user.AccountActivated = false;
+
+        context.Users.Update(user);
+        await context.SaveChangesAsync();
+
+        return true;
     }
 }
 
