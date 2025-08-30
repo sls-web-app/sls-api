@@ -120,11 +120,9 @@ public class UserInviteController(IUserInviteRepo userInviteRepo, IUserRepo user
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
 
-        var user = await userRepo.GetByEmailActiveAsync(email);
+        var user = await userRepo.GetByEmailAsync(email);
         if(user == null)
             return NotFound(new ErrorResponse { Message = $"User with email {email} not found" });
-        if (user.AccountActivated)
-            return BadRequest(new ErrorResponse { Message = $"User with email {email} has already activated their account" });
         if (user.Invite != null)
             await userInviteRepo.DeleteAsync(user.Invite.Id);
 

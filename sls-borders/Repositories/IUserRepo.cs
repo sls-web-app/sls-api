@@ -15,8 +15,8 @@ namespace sls_borders.Repositories
         Task<User?> ChangeEmailAsync(Guid userId, string newEmail);
         Task<User?> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword);
         Task<User?> GetByEmailAsync(string email);
-        Task<User?> GetByEmailActiveAsync(string email);
         Task<User?> LoginAsync(string email, string password);
         Task<User> RegisterAsync(Guid userId, string password);
+        Task<bool> DeactivateAccountAsync(Guid userId);
     }
 }
