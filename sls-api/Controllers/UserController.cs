@@ -6,6 +6,7 @@ using sls_borders.Repositories;
 using AutoMapper;
 using sls_borders.DTO.ErrorDto;
 using sls_borders.Models;
+using System.Security.Claims;
 
 namespace sls_api.Controllers;
 
@@ -98,7 +99,7 @@ public class UserController(IUserRepo userRepo, ApplicationDbContext dbContext, 
         try
         {
             var user = mapper.Map<User>(createUserDto);
-            var createdUser = await userRepo.CreateAsync(user, createUserDto.Password); 
+            var createdUser = await userRepo.CreateAsync(user, createUserDto.Password);
             return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, mapper.Map<GetUserDto>(createdUser));
         }
         catch (KeyNotFoundException ex)
@@ -181,6 +182,76 @@ public class UserController(IUserRepo userRepo, ApplicationDbContext dbContext, 
     {
         var exists = await userRepo.EmailExistsAsync(email);
         return Ok(exists);
+    }
+
+    [Authorize]
+    [HttpPost("change-email")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult> ChangeEmail([FromQuery] string newEmail)
+    {
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+            return Unauthorized(new ErrorResponse { Message = "User ID claim not found in token" });
+        if (!Guid.TryParse(userIdClaim.Value, out Guid userId))
+            return Unauthorized(new ErrorResponse { Message = "Invalid user ID format in token" });
+
+        try
+        {
+            var user = await userRepo.ChangeEmailAsync(userId, newEmail);
+            if (user == null)
+                return NotFound(new ErrorResponse { Message = $"User with ID {userId} not found" });
+
+            return Ok(mapper.Map<GetUserDto>(user));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new ErrorResponse { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new ErrorResponse { Message = ex.Message });
+        }
+    }
+
+    [Authorize]
+    [HttpPost("change-password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+    {
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+            return Unauthorized(new ErrorResponse { Message = "User ID claim not found in token" });
+        if (!Guid.TryParse(userIdClaim.Value, out Guid userId))
+            return Unauthorized(new ErrorResponse { Message = "Invalid user ID format in token" });
+
+        try
+        {
+            var updatedUser = await userRepo.ChangePasswordAsync(userId, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
+            if (updatedUser == null)
+                return NotFound(new ErrorResponse { Message = $"User with ID {userId} not found" });
+
+            return Ok(mapper.Map<GetUserDto>(updatedUser));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new ErrorResponse { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new ErrorResponse { Message = ex.Message });
+        }
     }
 }
 

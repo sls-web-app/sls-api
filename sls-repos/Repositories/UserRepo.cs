@@ -99,6 +99,43 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
         return await context.Users.AnyAsync(u => u.Email == email);
     }
 
+    public async Task<User?> ChangeEmailAsync(Guid userId, string newEmail)
+    {
+        var user = await GetByIdAsync(userId);
+        if (user == null)
+            return null;
+
+        var emailExists = await EmailExistsAsync(newEmail);
+        if (emailExists)
+            throw new InvalidOperationException($"Email '{newEmail}' is already in use.");
+
+        user.Email = newEmail;
+        context.Users.Update(user);
+        await context.SaveChangesAsync();
+
+        return user;
+    }
+
+    public async Task<User?> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword)
+    {
+        var user = await GetByIdAsync(userId);
+        if (user == null)
+            return null;
+
+        string currentHash = HashingUtils.HashPassword(currentPassword, user.PasswordSalt).Hash;
+        if (currentHash != user.PasswordHash)
+            throw new UnauthorizedAccessException("Current password is incorrect.");
+
+        (string newHash, string newSalt) = HashingUtils.HashPassword(newPassword);
+        user.PasswordHash = newHash;
+        user.PasswordSalt = newSalt;
+
+        context.Users.Update(user);
+        await context.SaveChangesAsync();
+
+        return user;
+    }
+
     public async Task<User?> GetByEmailAsync(string email)
     {
         return await context.Users
