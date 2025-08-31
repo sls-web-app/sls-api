@@ -33,7 +33,7 @@ public class TeamRepo(ApplicationDbContext context, IMapper mapper) : ITeamRepo
 
         if (existingTeam == null)
             return null;
-        
+
         mapper.Map(updateTeamDto, existingTeam);
 
         await context.SaveChangesAsync();
@@ -56,6 +56,19 @@ public class TeamRepo(ApplicationDbContext context, IMapper mapper) : ITeamRepo
         if (team == null) return false;
 
         context.Teams.Remove(team);
+        await context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> JoinEditonAsync(Guid teamId, Guid editionId)
+    {
+        var team = await context.Teams.FindAsync(teamId);
+        if (team == null) return false;
+
+        var edition = await context.Editions.FindAsync(editionId);
+        if (edition == null) return false;
+
+        team.Editions.Add(edition);
         await context.SaveChangesAsync();
         return true;
     }

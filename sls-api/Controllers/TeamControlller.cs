@@ -67,7 +67,7 @@ public class TeamController(ITeamRepo teamRepo, IMapper mapper, IImageService im
             return ValidationProblem(ModelState);
 
         var team = mapper.Map<Team>(createTeamDto);
-        
+
         // Handle avatar upload if provided
         if (avatar != null)
         {
@@ -136,6 +136,20 @@ public class TeamController(ITeamRepo teamRepo, IMapper mapper, IImageService im
 
         return NoContent();
     }
+
+    [HttpPost("join-edition/{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> JoinEdition(Guid id, [FromQuery] Guid editionId)
+    {
+        var result = await teamRepo.JoinEditonAsync(id, editionId);
+
+        if (!result)
+            return NotFound(new ErrorResponse { Message = $"Team with ID {id} or Edition with ID {editionId} not found." });
+
+        return Ok();
+    }
+
 }
 
 
