@@ -16,6 +16,9 @@ public class UserProfile : Profile
 
         CreateMap<User, GetUserDto>();
 
-        CreateMap<UpdateUserDto, User>();
+        CreateMap<UpdateUserDto, User>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.AccountActivated, opt => opt.Ignore())
+            .ForMember(dest => dest.IsInPlay, opt => opt.Ignore());
     }
 }

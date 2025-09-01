@@ -58,22 +58,6 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
 
         if (existingUser == null) return null;
 
-        if (!string.IsNullOrEmpty(updateUserDto.Email))
-        {
-            var emailExists = await EmailExistsAsync(updateUserDto.Email);
-            if (emailExists)
-            {
-                throw new InvalidOperationException($"Email '{updateUserDto.Email}' is already in use.");
-            }
-        }
-
-        if (!string.IsNullOrEmpty(updateUserDto.Password))
-        {
-            (string passwordHash, string passwordSalt) = HashingUtils.HashPassword(updateUserDto.Password);
-            existingUser.PasswordHash = passwordHash;
-            existingUser.PasswordSalt = passwordSalt;
-        }
-
         mapper.Map(updateUserDto, existingUser);
 
         context.Users.Update(existingUser);
