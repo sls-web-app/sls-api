@@ -19,6 +19,19 @@ public class TeamRepo(ApplicationDbContext context, IMapper mapper) : ITeamRepo
         return await context.Teams.FindAsync(id);
     }
 
+    public async Task<List<Team>?> GetAllTeamsInCurrentEditionAsync()
+    {
+        var currentEdition = await context.Editions.Where(e => e.IsActive).FirstOrDefaultAsync();
+
+        if (currentEdition == null)
+            return null;
+
+        // return teams that are in the current edition
+        return await context.Teams
+            .Where(t => t.Editions.Any(e => e.Id == currentEdition.Id))
+            .ToListAsync();
+    }
+
     public async Task<Team> CreateAsync(Team team)
     {
         context.Teams.Add(team);

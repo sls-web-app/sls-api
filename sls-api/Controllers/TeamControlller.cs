@@ -49,6 +49,16 @@ public class TeamController(ITeamRepo teamRepo, IMapper mapper, IImageService im
         return Ok(mapper.Map<GetTeamDto>(team));
     }
 
+    [HttpGet("get-all/current-edition-teams")]
+    public async Task<ActionResult<IEnumerable<GetTeamDto>>> GetAllTeamsInCurrentEdition()
+    {
+        var teams = await teamRepo.GetAllTeamsInCurrentEditionAsync();
+        if (teams == null)
+            return NotFound(new ErrorResponse { Message = "No active edition found or no teams in current edition." });
+
+        return Ok(mapper.Map<List<GetTeamDto>>(teams));
+    }
+
     /// <summary>
     /// Creates a new team in the system.
     /// </summary>

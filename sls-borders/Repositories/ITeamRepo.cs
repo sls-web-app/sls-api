@@ -7,6 +7,7 @@ namespace sls_borders.Repositories
     {
         Task<List<Team>> GetAllAsync();
         Task<Team?> GetByIdAsync(Guid id);
+        Task<List<Team>?> GetAllTeamsInCurrentEditionAsync();
         Task<Team> CreateAsync(Team team);
         Task<Team?> UpdateAsync(Guid id, UpdateTeamDto updateTeamDto);
         Task<bool> DeleteAsync(Guid id);
