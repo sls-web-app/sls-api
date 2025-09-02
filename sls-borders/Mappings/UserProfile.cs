@@ -16,6 +16,18 @@ public class UserProfile : Profile
 
         CreateMap<User, GetUserDto>();
 
+<<<<<<< Updated upstream
         CreateMap<UpdateUserDto, User>();
+=======
+        CreateMap<UpdateUserDto, User>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.AccountActivated, opt => opt.Ignore())
+            .ForMember(dest => dest.IsInPlay, opt => opt.Ignore())
+            .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+            .ForMember(dest => dest.PasswordSalt, opt => opt.Ignore())
+            .ForMember(dest => dest.ProfileImg, opt => opt.Condition(src => src.ProfileImg != null))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+>>>>>>> Stashed changes
     }
 }

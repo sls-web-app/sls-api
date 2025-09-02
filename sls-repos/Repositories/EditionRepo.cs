@@ -13,6 +13,13 @@ public class EditionRepo(ApplicationDbContext context) : IEditionRepo
         return await context.Editions.ToListAsync();
     }
 
+    public async Task<List<Edition>> GetAllRemainingEditionsForTeamAsync(Guid teamId)
+    {
+        return await context.Editions
+            .Where(e => !e.Teams.Any(t => t.Id == teamId))
+            .ToListAsync();
+    }
+
     public async Task<Edition> CreateAsync(Edition edition)
     {
         context.Editions.Add(edition);

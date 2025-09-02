@@ -121,15 +121,16 @@ namespace sls_utils.ImageUtils
         /// <param name="fileName">The name of the file to delete</param>
         /// <param name="category">The category of the image</param>
         /// <returns>True if deletion was successful</returns>
-        public bool DeleteImage(string fileName, ImageCategory category)
+        public async Task<bool> DeleteImageAsync(string fileName, ImageCategory category)
         {
             try
             {
                 var filePath = GetImagePath(fileName, category);
-                
+
                 if (File.Exists(filePath))
                 {
-                    File.Delete(filePath);
+                    // U¿ywaj Task.Run dla operacji I/O na plikach
+                    await Task.Run(() => File.Delete(filePath));
                     _logger.LogInformation("Image deleted successfully: {FileName}", fileName);
                     return true;
                 }
@@ -166,6 +167,36 @@ namespace sls_utils.ImageUtils
         {
             var categoryFolder = GetCategoryFolder(category);
             return Path.Combine(_uploadPath, categoryFolder, fileName);
+        }
+
+        /// </summary>
+        /// <param name="url">The URL of the image</param>
+        /// <returns>The file name and ImageCategory extracted from the URL</returns>
+        public (string fileName, ImageCategory category) GetNameFromUrl(string url)
+        {
+            try
+            {
+                var uri = new Uri(url);
+                var segments = uri.Segments;
+                if (segments.Length < 3)
+                {
+                    throw new ArgumentException("URL does not contain enough segments to determine category and filename.");
+                }
+                var categorySegment = segments[^2].TrimEnd('/').ToLower();
+                var fileName = segments[^1];
+                var category = categorySegment switch
+                {
+                    "avatars" => ImageCategory.Avatar,
+                    "images" => ImageCategory.Image,
+                    _ => throw new ArgumentException("Unknown category in URL.")
+                };
+                return (fileName, category);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error extracting name from URL: {Url}", url);
+                throw new ArgumentException("Invalid URL format.", ex);
+            }
         }
 
         /// <summary>
