@@ -38,8 +38,6 @@ namespace sls_api.Controllers
         public async Task<ActionResult<IEnumerable<GetEditionDto>>> GetAllRemainingEditionsForTeam(Guid teamId)
         {
             var editions = await editionRepo.GetAllRemainingEditionsForTeamAsync(teamId);
-            //if (editions == null || !editions.Any())
-            //    return Ok(new List<GetEditionDto>());
             return Ok(mapper.Map<List<GetEditionDto>>(editions));
         }
 
