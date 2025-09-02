@@ -76,7 +76,7 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
 
         mapper.Map(updateUserDto, existingUser);
 
-        context.Users.Update(existingUser);
+        //context.Users.Update(existingUser);
         await context.SaveChangesAsync();
 
         return existingUser;
