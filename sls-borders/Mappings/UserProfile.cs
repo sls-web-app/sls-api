@@ -16,9 +16,6 @@ public class UserProfile : Profile
 
         CreateMap<User, GetUserDto>();
 
-<<<<<<< Updated upstream
-        CreateMap<UpdateUserDto, User>();
-=======
         CreateMap<UpdateUserDto, User>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.AccountActivated, opt => opt.Ignore())
@@ -27,7 +24,5 @@ public class UserProfile : Profile
             .ForMember(dest => dest.PasswordSalt, opt => opt.Ignore())
             .ForMember(dest => dest.ProfileImg, opt => opt.Condition(src => src.ProfileImg != null))
             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
-
->>>>>>> Stashed changes
     }
 }

@@ -37,9 +37,6 @@ public class TeamRepo(ApplicationDbContext context, IMapper mapper, IImageServic
 
         if (existingTeam == null)
             return null;
-<<<<<<< Updated upstream
-        
-=======
 
         // Handle avatar upload if provided
         if (avatar != null)
@@ -67,7 +64,6 @@ public class TeamRepo(ApplicationDbContext context, IMapper mapper, IImageServic
             existingTeam.Img = uploadResult.ImageUrl;
         }
 
->>>>>>> Stashed changes
         mapper.Map(updateTeamDto, existingTeam);
 
         await context.SaveChangesAsync();
