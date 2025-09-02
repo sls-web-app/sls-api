@@ -93,9 +93,12 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
         if (currentActiveTournament != null)
             throw new InvalidOperationException("There is already an ongoing tournament in the current edition.");
 
+        var games = new List<Game>();
+
         if (tournament.Type == TournamentType.Swiss)
         {
             var players = tournament.Edition.Teams.SelectMany(t => t.Users).Where(u => u.IsInPlay).ToList();
+
             while (players.Count > 0)
             {
                 var player1 = players[0];
@@ -114,13 +117,58 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
                     player2 = players[player2Index];
                     players.Remove(player2);
                 }
+
+                games.Add(new Game
+                {
+                    TournamentId = tournament.Id,
+                    WhitePlayerId = player1.Id,
+                    BlackPlayerId = player2.Id,
+                    WhiteTeamId = player2.TeamId ?? Guid.Empty,
+                    BlackTeamId = player2.TeamId ?? Guid.Empty,
+                    Round = 1 
+                });
             }
         }
+
         if (tournament.Type == TournamentType.RoundRobin)
         {
-            
+            // Get all teams in the edition that have at least one player in play
+            var teams = tournament.Edition.Teams.ToList();
+
+            // Each team plays against every other team once per round
+            int rounds = teams.Count - 1 > 0 ? teams.Count - 1 : 1;
+
+            for (int round = 1; round <= rounds; round++)
+            {
+                for (int i = 0; i < teams.Count; i++)
+                {
+                    for (int j = i + 1; j < teams.Count; j++)
+                    {
+                        var teamA = teams[i];
+                        var teamB = teams[j];
+
+                        // Pick a random player in play from each team for this match
+                        var teamAPlayer = teamA.Users.FirstOrDefault(u => u.IsInPlay);
+                        var teamBPlayer = teamB.Users.FirstOrDefault(u => u.IsInPlay);
+
+                        if (teamAPlayer == null || teamBPlayer == null)
+                            continue; // Skip if no available player
+
+                        games.Add(new Game
+                        {
+                            TournamentId = tournament.Id,
+                            WhitePlayerId = teamAPlayer.Id,
+                            BlackPlayerId = teamBPlayer.Id,
+                            WhiteTeamId = teamA.Id,
+                            BlackTeamId = teamB.Id,
+                            Round = round
+                        });
+                    }
+                }
+            }
         }
 
+        context.Games.AddRange(games);
         tournament.Status = TournamentStatus.Ongoing;
         tournament.Round = 1;
 
