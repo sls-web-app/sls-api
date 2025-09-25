@@ -98,7 +98,7 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
 
         if (tournament.Type == TournamentType.Swiss)
         {
-            games = PairSwissPlayers(tournament, 1);
+            games = SwissMatcher.GenerateGamesForSwissTournament(tournament);
         }
 
         if (tournament.Type == TournamentType.RoundRobin)
@@ -182,6 +182,8 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
 
         if (tournament.Type == TournamentType.Swiss)
         {
+            var games = SwissMatcher.GenerateGamesForSwissTournament(tournament);
+            context.Games.AddRange(games);
         }
 
         await context.SaveChangesAsync();

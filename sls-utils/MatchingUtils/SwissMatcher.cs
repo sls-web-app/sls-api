@@ -55,7 +55,6 @@ namespace sls_utils.MatchingUtils
 
         public SwissTournament(List<MatchPlayer> players, int rounds)
         {
-            if (players.Count > 50) throw new ArgumentException("Max 50 players allowed");
             _players = players;
             _currentRound = rounds;
         }
