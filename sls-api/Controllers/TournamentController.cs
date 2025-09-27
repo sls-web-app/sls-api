@@ -173,6 +173,23 @@ public class TournamentController(ITournamentRepo tournamentRepo, IMapper mapper
         }
     }
 
+    [HttpPost("nextRound/{id:guid}")]
+    public async Task<IActionResult> AdvanceTournamentToNextRound(Guid id)
+    {
+        try
+        {
+            var result = await tournamentRepo.AdvandeToNextRoundAsync(id);
+            if (!result)
+                return NotFound(new ErrorResponse { Message = $"Tournament not found" });
+
+            return Ok();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new ErrorResponse { Message = ex.Message });
+        }
+    }
+
     [HttpPost("deactivate/{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
