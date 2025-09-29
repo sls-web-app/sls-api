@@ -103,39 +103,56 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
 
         if (tournament.Type == TournamentType.RoundRobin)
         {
-            // Get all teams in the edition that have at least one player in play
             var teams = tournament.Edition.Teams.ToList();
+            int teamCount = teams.Count;
+            if (teamCount < 2)
+                throw new InvalidOperationException("At least two teams are required for a round robin tournament.");
 
-            // Each team plays against every other team once per round
-            int rounds = teams.Count - 1 > 0 ? teams.Count - 1 : 1;
-
-            for (int round = 1; round <= rounds; round++)
+            // If odd number of teams, add a dummy team for bye (not null, but with Guid.Empty)
+            Team? byeTeam = null;
+            if (teamCount % 2 != 0)
             {
-                for (int i = 0; i < teams.Count; i++)
+                byeTeam = new Team { Id = Guid.Empty, Name = "BYE", Users = [] };
+                teams.Add(byeTeam);
+                teamCount++;
+            }
+
+            int rounds = teamCount - 1;
+            // Prepare a working list for rotation
+            var rotation = new List<Team>(teams);
+            for (int round = 0; round < rounds; round++)
+            {
+                for (int i = 0; i < teamCount / 2; i++)
                 {
-                    for (int j = i + 1; j < teams.Count; j++)
+                    var teamA = rotation[i];
+                    var teamB = rotation[teamCount - 1 - i];
+                    if (teamA.Id == Guid.Empty || teamB.Id == Guid.Empty)
+                        continue; // skip BYE
+
+                    int playerCount = Math.Min(teamA.Users.Count(u => u.IsInPlay), teamB.Users.Count(u => u.IsInPlay));
+                    for (int p = 0; p < playerCount; p++)
                     {
-                        var teamA = teams[i];
-                        var teamB = teams[j];
-
-                        // Pick a random player in play from each team for this match
-                        var teamAPlayer = teamA.Users.FirstOrDefault(u => u.IsInPlay);
-                        var teamBPlayer = teamB.Users.FirstOrDefault(u => u.IsInPlay);
-
-                        if (teamAPlayer == null || teamBPlayer == null)
-                            continue; // Skip if no available player
-
+                        var playerA = teamA.Users.ElementAtOrDefault(p);
+                        var playerB = teamB.Users.ElementAtOrDefault(p);
+                        if (playerA == null || playerB == null)
+                            continue;
+                        if (!(playerA.IsInPlay && playerB.IsInPlay))
+                            continue;
                         games.Add(new Game
                         {
                             TournamentId = tournament.Id,
-                            WhitePlayerId = teamAPlayer.Id,
-                            BlackPlayerId = teamBPlayer.Id,
+                            WhitePlayerId = playerA.Id,
+                            BlackPlayerId = playerB.Id,
                             WhiteTeamId = teamA.Id,
                             BlackTeamId = teamB.Id,
-                            Round = round
+                            Round = round + 1
                         });
                     }
                 }
+                // Rotate teams (except the first one)
+                var last = rotation[teamCount - 1];
+                rotation.RemoveAt(teamCount - 1);
+                rotation.Insert(1, last);
             }
         }
 
