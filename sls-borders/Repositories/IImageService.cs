@@ -17,15 +17,15 @@ namespace sls_borders.Repositories
         /// <param name="contentType">The MIME type of the file</param>
         /// <returns>Result containing file information and URL</returns>
         Task<ImageUploadResultDto> UploadImageAsync(Stream fileStream, string fileName, string contentType, ImageCategory category);
-        
+
         /// <summary>
         /// Deletes an image file
         /// </summary>
         /// <param name="fileName">The name of the file to delete</param>
         /// <param name="category">The category of the image</param>
         /// <returns>True if deletion was successful</returns>
-        bool DeleteImage(string fileName, ImageCategory category);
-        
+        Task<bool> DeleteImageAsync(string fileName, ImageCategory category);
+
         /// <summary>
         /// Gets the URL for an image
         /// </summary>
@@ -41,5 +41,12 @@ namespace sls_borders.Repositories
         /// <param name="category">The category of the image</param>
         /// <returns>The physical path to the image file</returns>
         string GetImagePath(string fileName, ImageCategory category);
+
+        /// <summary>
+        /// Gets the file name and image category from the image URL
+        /// </summary>
+        /// <param name="url">The URL of the image</param>
+        /// <returns>The file name and ImageCategory extracted from the URL</returns>
+        (string fileName, ImageCategory category) GetNameFromUrl(string url);
     }
 }

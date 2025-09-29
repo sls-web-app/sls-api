@@ -106,6 +106,7 @@ public class TeamController(ITeamRepo teamRepo, IMapper mapper, IImageService im
     /// </summary>
     /// <param name="id">The unique identifier of the team to update.</param>
     /// <param name="updateDto">The updated team data.</param>
+    /// <param name="avatar">The new team avatar image file (optional).</param>
     /// <returns>The updated team or a 404 error if not found.</returns>
     /// <response code="200">Returns the updated team.</response>
     /// <response code="400">Returns validation errors if the request model is invalid.</response>
@@ -114,12 +115,12 @@ public class TeamController(ITeamRepo teamRepo, IMapper mapper, IImageService im
     [ProducesResponseType<GetTeamDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateTeam(Guid id, [FromBody] UpdateTeamDto updateDto)
+    public async Task<IActionResult> UpdateTeam(Guid id, [FromForm] UpdateTeamDto updateDto, IFormFile? avatar)
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
 
-        var updatedTeam = await teamRepo.UpdateAsync(id, updateDto);
+        var updatedTeam = await teamRepo.UpdateAsync(id, updateDto, avatar);
 
         if (updatedTeam == null)
             return NotFound(new ErrorResponse { Message = $"Team with ID {id} not found." });
