@@ -12,7 +12,6 @@ public class User
     public string ProfileImg { get; set; } = null!;
     public string Name { get; set; } = null!;
     public string Surname { get; set; } = null!;
-    public string? ClassName { get; set; }
     public Role Role { get; set; } = Role.user;
     public bool AccountActivated { get; set; } = false;
     public bool IsInPlay { get; set; } = false;

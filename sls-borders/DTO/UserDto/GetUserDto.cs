@@ -13,7 +13,6 @@ public class GetUserDto
     public string ProfileImg { get; set; } = null!;
     public string Name { get; set; } = null!;
     public string Surname { get; set; } = null!;
-    public string? ClassName { get; set; }
     public Role Role { get; set; }
     public bool AccountActivated { get; set; }
     public bool IsInPlay { get; set; }

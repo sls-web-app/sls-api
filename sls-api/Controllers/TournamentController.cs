@@ -54,13 +54,13 @@ public class TournamentController(ITournamentRepo tournamentRepo, IMapper mapper
     /// <returns>A collection of tournaments for the current edition or a 404 error if no active edition exists.</returns>
     /// <response code="200">Returns the list of tournaments for the current edition.</response>
     /// <response code="404">Returns not found if there is no active edition.</response>
-    [HttpGet("get-all-curent-edition-tournaments")]
+    [HttpGet("get-all/curent-edition-tournaments")]
     [ProducesResponseType<IEnumerable<GetTournamentDto>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<IEnumerable<GetTournamentDto>>> GetAllCurrentEditionTournaments()
     {
         var tournaments = await tournamentRepo.GetAllCurrentEditionTournamentsAsync();
-        if(tournaments == null)
+        if (tournaments == null)
             return NotFound(new ErrorResponse { Message = "No active edition found." });
 
         return Ok(mapper.Map<List<GetTournamentDto>>(tournaments));
@@ -89,7 +89,7 @@ public class TournamentController(ITournamentRepo tournamentRepo, IMapper mapper
             var createdTournament = await tournamentRepo.CreateAsync(tournament);
 
             if (createdTournament == null)
-                return Problem("Nie uda³o siê utworzyæ turnieju.", statusCode: StatusCodes.Status500InternalServerError);
+                return Problem("Nie udaï¿½o siï¿½ utworzyï¿½ turnieju.", statusCode: StatusCodes.Status500InternalServerError);
 
             return CreatedAtAction(nameof(GetTournamentById), new { id = createdTournament.Id }, mapper.Map<GetTournamentDto>(createdTournament));
         }
@@ -150,6 +150,65 @@ public class TournamentController(ITournamentRepo tournamentRepo, IMapper mapper
             return NotFound(new ErrorResponse { Message = $"Tournament with ID {id} not found." });
 
         return NoContent();
+    }
+
+    [HttpPost("activate/{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ActivateTournament(Guid id)
+    {
+        try
+        {
+            var result = await tournamentRepo.ActivateTournamentAsync(id);
+
+            if (!result)
+                return NotFound(new ErrorResponse { Message = $"Tournament with ID {id} not found." });
+
+            return Ok();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new ErrorResponse { Message = ex.Message });
+        }
+    }
+
+    [HttpPost("nextRound/{id:guid}")]
+    public async Task<IActionResult> AdvanceTournamentToNextRound(Guid id)
+    {
+        try
+        {
+            var result = await tournamentRepo.AdvandeToNextRoundAsync(id);
+            if (!result)
+                return NotFound(new ErrorResponse { Message = $"Tournament not found" });
+
+            return Ok();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new ErrorResponse { Message = ex.Message });
+        }
+    }
+
+    [HttpPost("deactivate/{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> DeactivateTournament(Guid id)
+    {
+        try
+        {
+            var result = await tournamentRepo.DeactivateTournamentAsync(id);
+
+            if (!result)
+                return NotFound(new ErrorResponse { Message = $"Tournament with ID {id} not found." });
+
+            return Ok();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new ErrorResponse { Message = ex.Message });
+        }
     }
 }
 

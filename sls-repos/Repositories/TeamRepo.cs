@@ -23,6 +23,19 @@ public class TeamRepo(ApplicationDbContext context, IMapper mapper, IImageServic
         return await context.Teams.FindAsync(id);
     }
 
+    public async Task<List<Team>?> GetAllTeamsInCurrentEditionAsync()
+    {
+        var currentEdition = await context.Editions.Where(e => e.IsActive).FirstOrDefaultAsync();
+
+        if (currentEdition == null)
+            return null;
+
+        // return teams that are in the current edition
+        return await context.Teams
+            .Where(t => t.Editions.Any(e => e.Id == currentEdition.Id))
+            .ToListAsync();
+    }
+
     public async Task<Team> CreateAsync(Team team)
     {
         context.Teams.Add(team);
@@ -86,6 +99,19 @@ public class TeamRepo(ApplicationDbContext context, IMapper mapper, IImageServic
         if (team == null) return false;
 
         context.Teams.Remove(team);
+        await context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> JoinEditonAsync(Guid teamId, Guid editionId)
+    {
+        var team = await context.Teams.FindAsync(teamId);
+        if (team == null) return false;
+
+        var edition = await context.Editions.FindAsync(editionId);
+        if (edition == null) return false;
+
+        team.Editions.Add(edition);
         await context.SaveChangesAsync();
         return true;
     }

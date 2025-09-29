@@ -53,7 +53,6 @@ namespace sls_borders.Data
                 entity.Property(u => u.ProfileImg).IsRequired().HasMaxLength(200);
                 entity.Property(u => u.Name).IsRequired().HasMaxLength(50);
                 entity.Property(u => u.Surname).IsRequired().HasMaxLength(50);
-                entity.Property(u => u.ClassName).HasMaxLength(50);
                 entity.HasIndex(u => u.Email).IsUnique();
                 entity.Property(u => u.PasswordHash).IsRequired();
                 entity.Property(u => u.PasswordSalt).IsRequired();
