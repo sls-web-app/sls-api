@@ -32,30 +32,31 @@ public class AdminRepoTest
     [Fact]
     public async Task CreateAsync_ShouldAddAdmin()
     {
-        var dto = new CreateAdminDto { Username = "admin1", Password = "pass123" };
-        var admin = await _adminRepo.CreateAsync(dto);
+        var admin = new Admin { Username = "admin1", PasswordHash = "", PasswordSalt = "" };
+        var createdAdmin = await _adminRepo.CreateAsync(admin, "pass123");
 
-        Assert.NotNull(admin);
-        Assert.Equal("admin1", admin.Username);
-        Assert.False(string.IsNullOrEmpty(admin.PasswordHash));
-        Assert.False(string.IsNullOrEmpty(admin.PasswordSalt));
+        Assert.NotNull(createdAdmin);
+        Assert.Equal("admin1", createdAdmin.Username);
+        Assert.False(string.IsNullOrEmpty(createdAdmin.PasswordHash));
+        Assert.False(string.IsNullOrEmpty(createdAdmin.PasswordSalt));
     }
 
     [Fact]
     public async Task CreateAsync_ShouldThrowIfUsernameTaken()
     {
-        var dto = new CreateAdminDto { Username = "admin2", Password = "pass123" };
-        await _adminRepo.CreateAsync(dto);
+        var admin = new Admin { Username = "admin2", PasswordHash = "", PasswordSalt = "" };
+        await _adminRepo.CreateAsync(admin, "pass123");
 
+        var duplicateAdmin = new Admin { Username = "admin2", PasswordHash = "", PasswordSalt = "" };
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _adminRepo.CreateAsync(new CreateAdminDto { Username = "admin2", Password = "otherpass" }));
+            _adminRepo.CreateAsync(duplicateAdmin, "otherpass"));
     }
 
     [Fact]
     public async Task GetAllAsync_ShouldReturnAllAdmins()
     {
-        await _adminRepo.CreateAsync(new CreateAdminDto { Username = "admin3", Password = "pass" });
-        await _adminRepo.CreateAsync(new CreateAdminDto { Username = "admin4", Password = "pass" });
+        await _adminRepo.CreateAsync(new Admin { Username = "admin3", PasswordHash = "", PasswordSalt = "" }, "pass");
+        await _adminRepo.CreateAsync(new Admin { Username = "admin4", PasswordHash = "", PasswordSalt = "" }, "pass");
 
         var admins = await _adminRepo.GetAllAsync();
         Assert.True(admins.Count >= 2);
@@ -64,7 +65,7 @@ public class AdminRepoTest
     [Fact]
     public async Task GetByIdAsync_ShouldReturnCorrectAdmin()
     {
-        var created = await _adminRepo.CreateAsync(new CreateAdminDto { Username = "admin5", Password = "pass" });
+        var created = await _adminRepo.CreateAsync(new Admin { Username = "admin5", PasswordHash = "", PasswordSalt = "" }, "pass");
         var found = await _adminRepo.GetByIdAsync(created.Id);
 
         Assert.NotNull(found);
@@ -74,8 +75,7 @@ public class AdminRepoTest
     [Fact]
     public async Task LoginAsync_ShouldReturnAdminWithCorrectCredentials()
     {
-        var dto = new CreateAdminDto { Username = "admin6", Password = "secret" };
-        var created = await _adminRepo.CreateAsync(dto);
+        var created = await _adminRepo.CreateAsync(new Admin { Username = "admin6", PasswordHash = "", PasswordSalt = "" }, "secret");
 
         var admin = await _adminRepo.LoginAsync("admin6", "secret");
         Assert.NotNull(admin);
@@ -85,7 +85,7 @@ public class AdminRepoTest
     [Fact]
     public async Task LoginAsync_ShouldReturnNullWithWrongPassword()
     {
-        await _adminRepo.CreateAsync(new CreateAdminDto { Username = "admin7", Password = "rightpass" });
+        await _adminRepo.CreateAsync(new Admin { Username = "admin7", PasswordHash = "", PasswordSalt = "" }, "rightpass");
 
         var admin = await _adminRepo.LoginAsync("admin7", "wrongpass");
         Assert.Null(admin);
@@ -94,7 +94,7 @@ public class AdminRepoTest
     [Fact]
     public async Task UpdateAsync_ShouldUpdateUsernameAndPassword()
     {
-        var created = await _adminRepo.CreateAsync(new CreateAdminDto { Username = "admin8", Password = "oldpass" });
+        var created = await _adminRepo.CreateAsync(new Admin { Username = "admin8", PasswordHash = "", PasswordSalt = "" }, "oldpass");
         var oldHash = created.PasswordHash; // Store the original hash
 
         var dto = new UpdateAdminDto { Username = "admin8new", Password = "newpass" };
@@ -110,7 +110,7 @@ public class AdminRepoTest
     [Fact]
     public async Task DeleteAsync_ShouldRemoveAdmin()
     {
-        var created = await _adminRepo.CreateAsync(new CreateAdminDto { Username = "admin9", Password = "pass" });
+        var created = await _adminRepo.CreateAsync(new Admin { Username = "admin9", PasswordHash = "", PasswordSalt = "" }, "pass");
         var result = await _adminRepo.DeleteAsync(created.Id);
 
         Assert.True(result);
