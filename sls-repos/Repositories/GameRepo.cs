@@ -4,6 +4,7 @@ using sls_borders.DTO.GameDto;
 using sls_borders.Models;
 using sls_borders.Repositories;
 using sls_borders.Data;
+using sls_borders.Enums;
 
 namespace sls_repos.Repositories;
 // sls_repos/Repositories/GameRepo.cs
@@ -36,11 +37,11 @@ public class GameRepo(ApplicationDbContext context, IMapper mapper) : IGameRepo
         var blackPlayer = await context.Users.FindAsync(game.BlackPlayerId);
         if (blackPlayer == null)
             throw new InvalidOperationException($"Black player with ID {game.BlackPlayerId} not found.");
-        
+
         var whiteTeam = await context.Teams.FindAsync(game.WhiteTeamId);
         if (whiteTeam == null)
             throw new InvalidOperationException($"White team with ID {game.WhiteTeamId} not found.");
-        
+
         var blackTeam = await context.Teams.FindAsync(game.BlackTeamId);
         if (blackTeam == null)
             throw new InvalidOperationException($"Black team with ID {game.BlackTeamId} not found.");
@@ -110,5 +111,15 @@ public class GameRepo(ApplicationDbContext context, IMapper mapper) : IGameRepo
         await context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<Game?> UpdateScoreAsync(Guid id, GameScore score)
+    {
+        var existingGame = await context.Games.FindAsync(id);
+        if (existingGame == null) return null;
+
+        existingGame.Score = score;
+        await context.SaveChangesAsync();
+
+        return existingGame;
+    }
 }
-    
