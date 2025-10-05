@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using sls_borders.DTO.GameDto;
@@ -7,7 +8,7 @@ using sls_borders.Repositories;
 namespace sls_api.Hubs;
 
 // [Authorize]
-public class TournamentsHub(ITournamentRepo tournamentRepo, IGameRepo gameRepo) : Hub
+public class TournamentsHub(ITournamentRepo tournamentRepo, IGameRepo gameRepo, IMapper mapper) : Hub
 {
     public async Task JoinTournamentGroup(Guid tournamentId)
     {
@@ -34,5 +35,16 @@ public class TournamentsHub(ITournamentRepo tournamentRepo, IGameRepo gameRepo) 
                 Id = updatedGame.Id,
                 Score = updatedGame.Score
             });
+    }
+
+    public async Task AdvanceTournamentRound(Guid tournamentId)
+    {
+        var games = await tournamentRepo.AdvandeToNextRoundAsync(tournamentId);
+        if (games == null)
+        {
+            throw new InvalidOperationException($"Tournament with ID {tournamentId} not found or cannot advance.");
+        }
+
+        await Clients.Group(tournamentId.ToString()).SendAsync("TournamentRoundAdvanced", mapper.Map<List<GetGameDto>>(games));
     }
 }

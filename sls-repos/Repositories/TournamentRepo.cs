@@ -178,14 +178,14 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
         return true;
     }
 
-    public async Task<bool> AdvandeToNextRoundAsync(Guid id)
+    public async Task<List<Game>?> AdvandeToNextRoundAsync(Guid id)
     {
         var tournament = await context.Tournaments
             .Include(t => t.Games)
             .FirstOrDefaultAsync(t => t.Id == id);
 
         if (tournament == null)
-            return false;
+            return null;
 
         if (tournament.Status != TournamentStatus.Ongoing || tournament.Round == null)
             throw new InvalidOperationException("Only ongoing tournaments can advance to the next round.");
@@ -197,14 +197,21 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
 
         tournament.Round += 1;
 
+        List<Game> games = [];
         if (tournament.Type == TournamentType.Swiss)
         {
-            var games = SwissMatcher.GenerateGamesForSwissTournament(tournament);
+            games = SwissMatcher.GenerateGamesForSwissTournament(tournament);
             context.Games.AddRange(games);
+        }
+        if(tournament.Type == TournamentType.RoundRobin)
+        {
+            games = tournament.Games.Where(g => g.Round == tournament.Round).ToList();
+            if(games.Count == 0)
+                throw new InvalidOperationException("No more rounds available in Round Robin tournament.");
         }
 
         await context.SaveChangesAsync();
-        return true;
+        return games;
     }
 }
 
