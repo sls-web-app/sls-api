@@ -6,6 +6,7 @@ using sls_borders.Models;
 using sls_borders.Repositories;
 using sls_borders.Enums;
 using sls_utils.MatchingUtils;
+using sls_borders.DTO.GameDto;
 
 namespace sls_repos.Repositories;
 
@@ -178,7 +179,7 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
         return true;
     }
 
-    public async Task<List<Game>?> AdvandeToNextRoundAsync(Guid id)
+    public async Task<AdvanceToNextRoundDto?> AdvandeToNextRoundAsync(Guid id)
     {
         var tournament = await context.Tournaments
             .Include(t => t.Games)
@@ -211,7 +212,11 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
         }
 
         await context.SaveChangesAsync();
-        return games;
+        return new AdvanceToNextRoundDto
+        {
+            Games = mapper.Map<List<GetGameDto>>(games),
+            Round = tournament.Round.Value
+        };
     }
 }
 

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using sls_api.Configuration;
+using sls_api.Hubs;
 using sls_borders.Data;
 using sls_borders.Mappings;
 using sls_borders.Repositories;
@@ -104,6 +105,7 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/uploads"
 });
 
+
 // Remove HTTPS redirection in development when running in Docker
 if (!app.Environment.IsDevelopment())
 {
@@ -114,5 +116,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<TournamentsHub>("/hubs/tournaments");
 
 app.Run();

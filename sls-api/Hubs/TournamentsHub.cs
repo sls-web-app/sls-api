@@ -8,7 +8,7 @@ using sls_borders.Repositories;
 namespace sls_api.Hubs;
 
 // [Authorize]
-public class TournamentsHub(ITournamentRepo tournamentRepo, IGameRepo gameRepo, IMapper mapper) : Hub
+public class TournamentsHub(ITournamentRepo tournamentRepo, IGameRepo gameRepo) : Hub
 {
     public async Task JoinTournamentGroup(Guid tournamentId)
     {
@@ -45,6 +45,6 @@ public class TournamentsHub(ITournamentRepo tournamentRepo, IGameRepo gameRepo, 
             throw new InvalidOperationException($"Tournament with ID {tournamentId} not found or cannot advance.");
         }
 
-        await Clients.Group(tournamentId.ToString()).SendAsync("TournamentRoundAdvanced", mapper.Map<List<GetGameDto>>(games));
+        await Clients.Group(tournamentId.ToString()).SendAsync("TournamentRoundAdvanced", games);
     }
 }
