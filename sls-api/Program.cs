@@ -53,6 +53,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             
         };
     });
+builder.Services.AddSignalR();
 
 builder.Services.AddAuthorization();
 
@@ -105,17 +106,24 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/uploads"
 });
 
-
 // Remove HTTPS redirection in development when running in Docker
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
 
+
+app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapHub<TournamentsHub>("/hubs/tournament");
+});
+
 app.MapControllers();
-app.MapHub<TournamentsHub>("/hubs/tournaments");
 
 app.Run();
