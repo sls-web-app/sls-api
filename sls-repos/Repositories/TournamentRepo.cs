@@ -206,5 +206,45 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
         await context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<List<UserInPlay>?> GetUsersInTournamentAsync(Guid tournamentId)
+    {
+        var tournament = await context.Tournaments
+            .Include(t => t.Edition)
+            .ThenInclude(e => e.Teams)
+            .ThenInclude(t => t.Users)
+            .ThenInclude(u => u.Team)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(t => t.Id == tournamentId);
+
+        if (tournament == null)
+            return null;
+
+        var usersInPlay = tournament.Edition.Teams
+            .SelectMany(team => team.Users)
+            .Where(user => user.IsInPlay)
+            .ToList();
+
+        var userInPlayDtos = mapper.Map<List<UserInPlay>>(usersInPlay);
+
+        foreach (var userDto in userInPlayDtos)
+        {
+            var userGames = await context.Games
+                .Where(g => (g.WhitePlayerId == userDto.Id || g.BlackPlayerId == userDto.Id) && g.Score != null)
+                .ToListAsync();
+
+            userDto.Wins = userGames.Count(g =>
+                (g.WhitePlayerId == userDto.Id && g.Score == GameScore.WhiteWin) ||
+                (g.BlackPlayerId == userDto.Id && g.Score == GameScore.BlackWin));
+
+            userDto.Draws = userGames.Count(g => g.Score == GameScore.Draw);
+
+            userDto.Losses = userGames.Count(g =>
+                (g.WhitePlayerId == userDto.Id && g.Score == GameScore.BlackWin) ||
+                (g.BlackPlayerId == userDto.Id && g.Score == GameScore.WhiteWin));
+        }
+
+        return userInPlayDtos;
+    }
 }
 

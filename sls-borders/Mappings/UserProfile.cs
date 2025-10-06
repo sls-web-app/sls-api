@@ -24,5 +24,6 @@ public class UserProfile : Profile
             .ForMember(dest => dest.PasswordSalt, opt => opt.Ignore())
             .ForMember(dest => dest.ProfileImg, opt => opt.Condition(src => src.ProfileImg != null))
             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+        CreateMap<User, UserInPlay>();
     }
 }

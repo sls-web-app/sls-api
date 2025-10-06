@@ -66,6 +66,18 @@ public class TournamentController(ITournamentRepo tournamentRepo, IMapper mapper
         return Ok(mapper.Map<List<GetTournamentDto>>(tournaments));
     }
 
+    [HttpGet("get-users-in-tournament/{tournamentId:guid}")]
+    [ProducesResponseType<IEnumerable<UserInPlay>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IEnumerable<UserInPlay>>> GetUsersInTournament(Guid tournamentId)
+    {
+        var users = await tournamentRepo.GetUsersInTournamentAsync(tournamentId);
+        if (users == null)
+            return NotFound(new ErrorResponse { Message = "Tournament not found or no users in tournament." });
+
+        return Ok(mapper.Map<List<UserInPlay>>(users));
+    }
+
     /// <summary>
     /// Creates a new tournament in the system.
     /// </summary>

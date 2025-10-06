@@ -10,5 +10,6 @@ namespace sls_borders.Repositories
         Task<Game> CreateAsync(Game game);
         Task<Game?> UpdateAsync(Guid id, UpdateGameDto game);
         Task<bool> DeleteAsync(Guid id);
+        Task<List<Game>> GetByTournamentIdAsync(Guid tournamentId);
     }
 }
