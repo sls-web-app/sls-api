@@ -45,6 +45,14 @@ public class GameController(IGameRepo gameRepo, IMapper mapper) : ControllerBase
         return Ok(mapper.Map<GetGameDto>(game));
     }
 
+    [HttpGet("get-by-tournament-id/{tournamentId:guid}")]
+    [ProducesResponseType<IEnumerable<GetGameDto>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<IEnumerable<GetGameDto>>> GetGamesByTournamentId(Guid tournamentId)
+    {
+        var games = await gameRepo.GetByTournamentIdAsync(tournamentId);
+        return Ok(mapper.Map<List<GetGameDto>>(games));
+    }
+
     /// <summary>
     /// Creates a new game in the system.
     /// </summary>

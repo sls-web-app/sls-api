@@ -36,11 +36,11 @@ public class GameRepo(ApplicationDbContext context, IMapper mapper) : IGameRepo
         var blackPlayer = await context.Users.FindAsync(game.BlackPlayerId);
         if (blackPlayer == null)
             throw new InvalidOperationException($"Black player with ID {game.BlackPlayerId} not found.");
-        
+
         var whiteTeam = await context.Teams.FindAsync(game.WhiteTeamId);
         if (whiteTeam == null)
             throw new InvalidOperationException($"White team with ID {game.WhiteTeamId} not found.");
-        
+
         var blackTeam = await context.Teams.FindAsync(game.BlackTeamId);
         if (blackTeam == null)
             throw new InvalidOperationException($"Black team with ID {game.BlackTeamId} not found.");
@@ -110,5 +110,11 @@ public class GameRepo(ApplicationDbContext context, IMapper mapper) : IGameRepo
         await context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<List<Game>> GetByTournamentIdAsync(Guid tournamentId)
+    {
+        return await context.Games
+            .Where(g => g.TournamentId == tournamentId)
+            .ToListAsync();
+    }
 }
-    
