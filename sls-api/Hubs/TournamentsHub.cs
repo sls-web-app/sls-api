@@ -29,7 +29,7 @@ public class TournamentsHub(ITournamentRepo tournamentRepo, IGameRepo gameRepo) 
             throw new InvalidOperationException($"Game with ID {gameId} not found.");
         }
 
-        await Clients.Group(updatedGame.TournamentId.ToString())
+        await Clients.All
             .SendAsync("GameScoreUpdated", new UpdatedScoreDto
             {
                 Id = updatedGame.Id,
@@ -45,6 +45,6 @@ public class TournamentsHub(ITournamentRepo tournamentRepo, IGameRepo gameRepo) 
             throw new InvalidOperationException($"Tournament with ID {tournamentId} not found or cannot advance.");
         }
 
-        await Clients.Group(tournamentId.ToString()).SendAsync("TournamentRoundAdvanced", games);
+        await Clients.All.SendAsync("TournamentRoundAdvanced", games);
     }
 }

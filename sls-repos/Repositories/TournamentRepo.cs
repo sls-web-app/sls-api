@@ -183,6 +183,10 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
     {
         var tournament = await context.Tournaments
             .Include(t => t.Games)
+            .Include(t => t.Edition)
+            .ThenInclude(e => e.Teams)
+            .ThenInclude(t => t.Users)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(t => t.Id == id);
 
         if (tournament == null)
