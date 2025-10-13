@@ -80,7 +80,7 @@ namespace sls_utils.MatchingUtils
                 byeCandidate.HadBye = true;
                 byeCandidate.Score += 1.0;
                 matches.Add(new Match(byeCandidate, null));
-                sorted.Remove(byeCandidate);
+                
             }
 
             // Grupowanie po punktach
@@ -116,10 +116,51 @@ namespace sls_utils.MatchingUtils
 
             var pairs = new List<Match>();
             if (!PairGroupBacktrack(group, pairs))
-                return false;
+            {
+                FallbackPairing(group, pairs);
+            }
 
             output.AddRange(pairs);
             return PairGroups(groups, idx + 1, output);
+        }
+
+        private void FallbackPairing(List<MatchPlayer> players, List<Match> matches)
+        {
+            Console.WriteLine("Warning: Using fallback pairing with relaxed constraints");
+            
+            while (players.Count >= 2)
+            {
+                var p1 = players[0];
+                players.RemoveAt(0);
+                
+                var bestIdx = 0;
+                var lowestReplays = int.MaxValue;
+                
+                for (int i = 0; i < players.Count; i++)
+                {
+                    if (!p1.Opponents.Contains(players[i].Id))
+                    {
+                        bestIdx = i;
+                        break;
+                    }
+                    else if (p1.Opponents.Count(id => id == players[i].Id) < lowestReplays)
+                    {
+                        lowestReplays = p1.Opponents.Count(id => id == players[i].Id);
+                        bestIdx = i;
+                    }
+                }
+                
+                var p2 = players[bestIdx];
+                players.RemoveAt(bestIdx);
+                
+                var (white, black) = AssignColors(p1, p2);
+                white.Colors.Add('W');
+                black.Colors.Add('B');
+                p1.Opponents.Add(p2.Id);
+                p2.Opponents.Add(p1.Id);
+                
+                matches.Add(new Match(white, black));
+            }
         }
 
         private bool PairGroupBacktrack(List<MatchPlayer> players, List<Match> matches)
@@ -178,69 +219,78 @@ namespace sls_utils.MatchingUtils
     {
         public static List<Game> GenerateGamesForSwissTournament(Tournament tournament)
         {
-        var players = tournament.Edition.Teams
-                    .SelectMany(t => t.Users)
-                    .Where(u => u.IsInPlay)
-                    .ToList();
-        var matchPlayers = new List<MatchPlayer>();
+            var players = tournament.Edition.Teams
+                        .SelectMany(t => t.Users)
+                        .Where(u => u.IsInPlay)
+                        .ToList();
+            var matchPlayers = new List<MatchPlayer>();
 
-        foreach (var player in players) // Wiem że to nieoptymalne, ale trudno
-        {
-            var opponents = tournament.Games
-                .Where(g => (g.WhitePlayerId == player.Id || g.BlackPlayerId == player.Id) && g.Score != null)
-                .Select(g => g.WhitePlayerId == player.Id ? g.BlackPlayerId : g.WhitePlayerId)
-                .ToHashSet();
-
-            var colors = tournament.Games
-                .Where(g => (g.WhitePlayerId == player.Id || g.BlackPlayerId == player.Id) && g.Score != null)
-                .Select(g => g.WhitePlayerId == player.Id ? 'W' : 'B')
-                .ToList();
-
-            var playerScore = tournament.Games
-                .Where(g => (g.WhitePlayerId == player.Id && g.Score == GameScore.WhiteWin) || (g.BlackPlayerId == player.Id && g.Score == GameScore.BlackWin))
-                .Count() * 1.0 +
-                tournament.Games.Where(g => (g.WhitePlayerId == player.Id || g.BlackPlayerId == player.Id) && g.Score == GameScore.Draw)
-                .Count() * 0.5;
-            
-            var hadBye = tournament.Games
-                .Where(g => g.WhitePlayerId == player.Id && g.BlackPlayerId == Guid.Empty)
-                .Any();
-
-            matchPlayers.Add(new MatchPlayer(player.Id, opponents, colors, playerScore, hadBye));
-        }
-
-        var swissTournament = new SwissTournament(matchPlayers, tournament.Round ?? 1); 
-        var matches = swissTournament.NextRound();
-
-        var games = new List<Game>();
-        foreach (var match in matches)
-        {
-            if (match.IsBye)
+            foreach (var player in players) // Wiem że to nieoptymalne, ale trudno
             {
+                var opponents = tournament.Games
+                    .Where(g => (g.WhitePlayerId == player.Id || g.BlackPlayerId == player.Id) && g.Score != null)
+                    .Select(g => g.WhitePlayerId == player.Id ? g.BlackPlayerId : g.WhitePlayerId)
+                    .ToHashSet();
+
+                var colors = tournament.Games
+                    .Where(g => (g.WhitePlayerId == player.Id || g.BlackPlayerId == player.Id) && g.Score != null)
+                    .Select(g => g.WhitePlayerId == player.Id ? 'W' : 'B')
+                    .ToList();
+
+                var playerScore = tournament.Games
+                    .Where(g => (g.WhitePlayerId == player.Id && g.Score == GameScore.WhiteWin) || (g.BlackPlayerId == player.Id && g.Score == GameScore.BlackWin))
+                    .Count() * 1.0 +
+                    tournament.Games.Where(g => (g.WhitePlayerId == player.Id || g.BlackPlayerId == player.Id) && g.Score == GameScore.Draw)
+                    .Count() * 0.5;
+                
+                var hadBye = tournament.Games
+                    .Where(g => g.WhitePlayerId == player.Id && g.BlackPlayerId == Guid.Empty)
+                    .Any();
+
+                matchPlayers.Add(new MatchPlayer(player.Id, opponents, colors, playerScore, hadBye));
+            }
+
+            var swissTournament = new SwissTournament(matchPlayers, tournament.Round ?? 1); 
+            var matches = swissTournament.NextRound();
+
+            var games = new List<Game>();
+
+            foreach (var match in matches)
+            {
+                if (match.IsBye)
+                {
+                    games.Add(new Game
+                    {
+                        TournamentId = tournament.Id,
+                        WhitePlayerId = match.White.Id,
+                        BlackPlayerId = Guid.Empty,
+                        WhiteTeamId = tournament.Edition.Teams.FirstOrDefault(t => t.Users.Any(u => u.Id == match.White.Id))?.Id ?? Guid.Empty,
+                        BlackTeamId = Guid.Empty,
+                        Round = tournament.Round ?? 1,
+                    });
+                    continue;
+                }
+
                 games.Add(new Game
                 {
                     TournamentId = tournament.Id,
                     WhitePlayerId = match.White.Id,
-                    BlackPlayerId = Guid.Empty,
+                    BlackPlayerId = match.Black!.Id,
                     WhiteTeamId = tournament.Edition.Teams.FirstOrDefault(t => t.Users.Any(u => u.Id == match.White.Id))?.Id ?? Guid.Empty,
-                    BlackTeamId = Guid.Empty,
-                    Round = tournament.Round ?? 1
+                    BlackTeamId = tournament.Edition.Teams.FirstOrDefault(t => t.Users.Any(u => u.Id == match.Black!.Id))?.Id ?? Guid.Empty,
+                    Round = tournament.Round ?? 1,
                 });
-                continue;
             }
 
-            games.Add(new Game
-            {
-                TournamentId = tournament.Id,
-                WhitePlayerId = match.White.Id,
-                BlackPlayerId = match.Black!.Id,
-                WhiteTeamId = tournament.Edition.Teams.FirstOrDefault(t => t.Users.Any(u => u.Id == match.White.Id))?.Id ?? Guid.Empty,
-                BlackTeamId = tournament.Edition.Teams.FirstOrDefault(t => t.Users.Any(u => u.Id == match.Black!.Id))?.Id ?? Guid.Empty,
-                Round = tournament.Round ?? 1
-            });
+            // Sort games by player scores (higher-ranked players first)
+            return games.OrderBy(g => {
+                // Find white player score
+                var whitePlayer = matchPlayers.FirstOrDefault(p => p.Id == g.WhitePlayerId);
+                // Bye games go last
+                if (g.BlackPlayerId == Guid.Empty) 
+                    return double.MaxValue;
+                return -(whitePlayer?.Score ?? 0); // Negative to sort descending
+            }).ToList();
         }
-
-        return games;
-    }
     }
 }
