@@ -7,6 +7,8 @@ using sls_borders.Repositories;
 using sls_borders.Enums;
 using sls_utils.MatchingUtils;
 using sls_borders.DTO.GameDto;
+using sls_borders.DTO.UserDto;
+using sls_utils.BuchholzUtils;
 
 namespace sls_repos.Repositories;
 
@@ -258,6 +260,12 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
             userDto.Losses = userGames.Count(g =>
                 (g.WhitePlayerId == userDto.Id && g.Score == GameScore.BlackWin) ||
                 (g.BlackPlayerId == userDto.Id && g.Score == GameScore.WhiteWin));
+        }
+
+        foreach(var player in userInPlayDtos)
+        {
+            player.FullBuchholz = BuchholzCalculator.CalculateFullBuchholzScore(userInPlayDtos, player);
+            player.MedianBuchholz = BuchholzCalculator.CalculateMedianBuchholzScore(userInPlayDtos, player);
         }
 
         return userInPlayDtos;

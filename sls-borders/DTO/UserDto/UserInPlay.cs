@@ -1,6 +1,8 @@
 using sls_borders.DTO.TeamDto;
 using sls_borders.Enums;
 
+namespace sls_borders.DTO.UserDto;
+
 public class UserInPlay
 {
     public Guid Id { get; set; }
@@ -18,4 +20,6 @@ public class UserInPlay
     public int Wins { get; set; }
     public int Draws { get; set; }
     public int Losses { get; set; }
+    public int FullBuchholz { get; set; }
+    public int MedianBuchholz { get; set; }
 }

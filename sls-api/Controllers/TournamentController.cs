@@ -4,6 +4,7 @@ using sls_borders.Repositories;
 using AutoMapper;
 using sls_borders.DTO.ErrorDto;
 using sls_borders.Models;
+using sls_borders.DTO.UserDto;
 
 namespace sls_api.Controllers;
 

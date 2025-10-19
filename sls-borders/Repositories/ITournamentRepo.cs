@@ -1,4 +1,5 @@
 using sls_borders.DTO.TournamentDto;
+using sls_borders.DTO.UserDto;
 using sls_borders.Models;
 
 namespace sls_borders.Repositories
