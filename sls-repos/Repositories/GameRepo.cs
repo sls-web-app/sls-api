@@ -122,4 +122,11 @@ public class GameRepo(ApplicationDbContext context, IMapper mapper) : IGameRepo
 
         return existingGame;
     }
+
+    public async Task<List<Game>> GetByTournamentIdAsync(Guid tournamentId)
+    {
+        return await context.Games
+            .Where(g => g.TournamentId == tournamentId)
+            .ToListAsync();
+    }
 }

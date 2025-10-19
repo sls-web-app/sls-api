@@ -13,5 +13,7 @@
     <None Include="docker-compose.yml" />
     <None Include=".dockerignore" />
     <None Include="PGADMIN_CONNECTION.md" />
+    <None Include="sls-tests\TournamentSystemIntegrationTest.cs" />
+    <None Include="sls-tests\TournamentSystemIntegrationTests_README.md" />
   </ItemGroup>
 </Project>

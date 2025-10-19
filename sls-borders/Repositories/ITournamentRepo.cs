@@ -10,6 +10,7 @@ namespace sls_borders.Repositories
         Task<List<Tournament>?> GetAllCurrentEditionTournamentsAsync();
         Task<Tournament?> CreateAsync(Tournament tournament);
         Task<Tournament?> UpdateAsync(Guid id, UpdateTournamentDto tournament);
+        Task<List<UserInPlay>?> GetUsersInTournamentAsync(Guid tournamentId);
         Task<bool> DeleteAsync(Guid id);
         Task<bool> ActivateTournamentAsync(Guid id);
         Task<bool> DeactivateTournamentAsync(Guid id);

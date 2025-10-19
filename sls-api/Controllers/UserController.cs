@@ -266,5 +266,24 @@ public class UserController(IUserRepo userRepo, ApplicationDbContext dbContext, 
             return BadRequest(new ErrorResponse { Message = ex.Message });
         }
     }
+
+    [Authorize]
+    [HttpPost("get-user-data")]
+    [ProducesResponseType<GetUserDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<GetUserDto>> GetUserData()
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+            return Unauthorized(new ErrorResponse { Message = "User ID claim not found in token" });
+        if (!Guid.TryParse(userIdClaim.Value, out Guid userId))
+            return Unauthorized(new ErrorResponse { Message = "Invalid user ID format in token" });
+
+        var user = await userRepo.GetByIdAsync(userId);
+        if (user == null)
+            return Unauthorized(new ErrorResponse { Message = $"User with ID {userId} not found" });
+
+        return Ok(mapper.Map<GetUserDto>(user));
+    }
 }
 

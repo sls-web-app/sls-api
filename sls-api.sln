@@ -25,6 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{
 		registration_email.html = registration_email.html
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sls-tests", "sls-tests\sls-tests.csproj", "{B92D5418-A597-1A24-7569-38C923E567D5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -95,6 +97,18 @@ Global
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|x64.Build.0 = Release|Any CPU
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|x86.ActiveCfg = Release|Any CPU
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|x86.Build.0 = Release|Any CPU
+		{B92D5418-A597-1A24-7569-38C923E567D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B92D5418-A597-1A24-7569-38C923E567D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B92D5418-A597-1A24-7569-38C923E567D5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B92D5418-A597-1A24-7569-38C923E567D5}.Debug|x64.Build.0 = Debug|Any CPU
+		{B92D5418-A597-1A24-7569-38C923E567D5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B92D5418-A597-1A24-7569-38C923E567D5}.Debug|x86.Build.0 = Debug|Any CPU
+		{B92D5418-A597-1A24-7569-38C923E567D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B92D5418-A597-1A24-7569-38C923E567D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B92D5418-A597-1A24-7569-38C923E567D5}.Release|x64.ActiveCfg = Release|Any CPU
+		{B92D5418-A597-1A24-7569-38C923E567D5}.Release|x64.Build.0 = Release|Any CPU
+		{B92D5418-A597-1A24-7569-38C923E567D5}.Release|x86.ActiveCfg = Release|Any CPU
+		{B92D5418-A597-1A24-7569-38C923E567D5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
