@@ -47,4 +47,15 @@ public class TournamentsHub(ITournamentRepo tournamentRepo, IGameRepo gameRepo) 
 
         await Clients.All.SendAsync("TournamentRoundAdvanced", games);
     }
+
+    public async Task EndTournament(Guid tournamentId)
+    {
+        var success = await tournamentRepo.DeactivateTournamentAsync(tournamentId);
+        if (!success)
+        {
+            throw new InvalidOperationException($"Tournament with ID {tournamentId} not found or cannot be ended.");
+        }
+
+        await Clients.All.SendAsync("TournamentEnded", tournamentId);
+    }
 }
