@@ -31,6 +31,19 @@ public class UserController(IUserRepo userRepo, ApplicationDbContext dbContext, 
         return Ok(mapper.Map<List<GetUserDto>>(users));
     }
 
+    [HttpGet("get-by-tournament/{tournamentId:guid}")]
+    [ProducesResponseType<IEnumerable<GetUserDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IEnumerable<GetUserDto>>> GetTournamentUsers(Guid tournamentId)
+    {
+        var users = await userRepo.GetAllByTournamentIdAsync(tournamentId);
+
+        if (users.Count == 0)
+            return NotFound(new ErrorResponse { Message = $"No users found for tournament {tournamentId}" });
+
+        return Ok(mapper.Map<List<GetUserDto>>(users));
+    }
+
     /// <summary>
     /// Retrieves a specific user by their unique identifier.
     /// </summary>

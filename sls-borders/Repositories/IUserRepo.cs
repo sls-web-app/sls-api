@@ -18,5 +18,6 @@ namespace sls_borders.Repositories
         Task<User?> LoginAsync(string email, string password);
         Task<User> RegisterAsync(Guid userId, string password);
         Task<bool> DeactivateAccountAsync(Guid userId);
+        Task<List<User>> GetAllByTournamentIdAsync(Guid tournamentId);
     }
 }

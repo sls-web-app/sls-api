@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using sls_api.Configuration;
+using sls_api.Hubs;
 using sls_borders.Data;
 using sls_borders.Mappings;
 using sls_borders.Repositories;
@@ -25,9 +26,11 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("DevelopmentCorsPolicy", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        policy.WithOrigins("http://localhost:3000") 
+          .AllowAnyMethod()
+          .AllowAnyHeader()
+          .AllowCredentials();
+
     });
 });
 
@@ -52,6 +55,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             
         };
     });
+builder.Services.AddSignalR();
 
 builder.Services.AddAuthorization();
 
@@ -110,8 +114,17 @@ if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
+
+app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapHub<TournamentsHub>("/hubs/tournament");
+});
 
 app.MapControllers();
 

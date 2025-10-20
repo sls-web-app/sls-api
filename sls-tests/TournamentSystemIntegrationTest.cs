@@ -90,7 +90,7 @@ public class TournamentSystemIntegrationTest : IDisposable
 
         // Step 8: Advance to next round
         var advanceResult = await _tournamentRepo.AdvandeToNextRoundAsync(swissTournament.Id);
-        Assert.True(advanceResult);
+        Assert.NotNull(advanceResult);
 
         // Verify round advancement
         var tournamentAfterAdvance = await _tournamentRepo.GetByIdAsync(swissTournament.Id);

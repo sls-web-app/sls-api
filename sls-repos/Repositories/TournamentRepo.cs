@@ -6,6 +6,9 @@ using sls_borders.Models;
 using sls_borders.Repositories;
 using sls_borders.Enums;
 using sls_utils.MatchingUtils;
+using sls_borders.DTO.GameDto;
+using sls_borders.DTO.UserDto;
+using sls_utils.BuchholzUtils;
 
 namespace sls_repos.Repositories;
 
@@ -178,14 +181,18 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
         return true;
     }
 
-    public async Task<bool> AdvandeToNextRoundAsync(Guid id)
+    public async Task<AdvanceToNextRoundDto?> AdvandeToNextRoundAsync(Guid id)
     {
         var tournament = await context.Tournaments
             .Include(t => t.Games)
+            .Include(t => t.Edition)
+            .ThenInclude(e => e.Teams)
+            .ThenInclude(t => t.Users)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(t => t.Id == id);
 
         if (tournament == null)
-            return false;
+            return null;
 
         if (tournament.Status != TournamentStatus.Ongoing || tournament.Round == null)
             throw new InvalidOperationException("Only ongoing tournaments can advance to the next round.");
@@ -197,14 +204,25 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
 
         tournament.Round += 1;
 
+        List<Game> games = [];
         if (tournament.Type == TournamentType.Swiss)
         {
-            var games = SwissMatcher.GenerateGamesForSwissTournament(tournament);
+            games = SwissMatcher.GenerateGamesForSwissTournament(tournament);
             context.Games.AddRange(games);
+        }
+        if(tournament.Type == TournamentType.RoundRobin)
+        {
+            games = tournament.Games.Where(g => g.Round == tournament.Round).ToList();
+            if(games.Count == 0)
+                throw new InvalidOperationException("No more rounds available in Round Robin tournament.");
         }
 
         await context.SaveChangesAsync();
-        return true;
+        return new AdvanceToNextRoundDto
+        {
+            Games = mapper.Map<List<GetGameDto>>(games),
+            Round = tournament.Round.Value
+        };
     }
 
     public async Task<List<UserInPlay>?> GetUsersInTournamentAsync(Guid tournamentId)
@@ -244,7 +262,34 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
                 (g.BlackPlayerId == userDto.Id && g.Score == GameScore.WhiteWin));
         }
 
+        foreach (var player in userInPlayDtos)
+        {
+            player.FullBuchholz = BuchholzCalculator.CalculateFullBuchholzScore(userInPlayDtos, player);
+            player.MedianBuchholz = BuchholzCalculator.CalculateMedianBuchholzScore(userInPlayDtos, player);
+        }
+
         return userInPlayDtos;
+    }
+
+    public async Task<bool> UndoLastRoundAsync(Guid id)
+    {
+        var tournament = await context.Tournaments
+            .Include(t => t.Games)
+            .FirstOrDefaultAsync(t => t.Id == id);
+
+        if (tournament == null)
+            return false;
+
+        if (tournament.Status != TournamentStatus.Ongoing || tournament.Round == null || tournament.Round <= 1)
+            throw new InvalidOperationException("Cannot undo round for this tournament.");
+
+        var lastRoundGames = tournament.Games.Where(g => g.Round == tournament.Round).ToList();
+        context.Games.RemoveRange(lastRoundGames);
+
+        tournament.Round -= 1;
+
+        await context.SaveChangesAsync();
+        return true;
     }
 }
 

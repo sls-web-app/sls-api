@@ -157,5 +157,31 @@ public class UserRepo(ApplicationDbContext context, IMapper mapper) : IUserRepo
 
         return true;
     }
+
+    public async Task<List<User>> GetAllByTournamentIdAsync(Guid tournamentId)
+    {
+        var tournament = await context.Tournaments
+            .Include(t => t.Edition)
+                .ThenInclude(e => e.Teams)
+                    .ThenInclude(team => team.Users)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(t => t.Id == tournamentId);
+
+        if (tournament?.Edition == null)
+            return new List<User>();
+
+        // Collect user IDs from edition teams
+        var userIds = tournament.Edition.Teams
+            .SelectMany(t => t.Users.Select(u => u.Id))
+            .Distinct()
+            .ToList();
+
+        // Load users with Team navigation for DTO mapping
+        var query = context.Users
+            .Include(u => u.Team)
+            .Where(u => userIds.Contains(u.Id));
+
+        return await query.ToListAsync();
+    }
 }
 

@@ -4,6 +4,7 @@ using sls_borders.DTO.GameDto;
 using sls_borders.Models;
 using sls_borders.Repositories;
 using sls_borders.Data;
+using sls_borders.Enums;
 
 namespace sls_repos.Repositories;
 // sls_repos/Repositories/GameRepo.cs
@@ -109,6 +110,17 @@ public class GameRepo(ApplicationDbContext context, IMapper mapper) : IGameRepo
         context.Games.Remove(game);
         await context.SaveChangesAsync();
         return true;
+    }
+
+    public async Task<Game?> UpdateScoreAsync(Guid id, GameScore score)
+    {
+        var existingGame = await context.Games.FindAsync(id);
+        if (existingGame == null) return null;
+
+        existingGame.Score = score;
+        await context.SaveChangesAsync();
+
+        return existingGame;
     }
 
     public async Task<List<Game>> GetByTournamentIdAsync(Guid tournamentId)

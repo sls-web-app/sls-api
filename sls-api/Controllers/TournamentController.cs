@@ -4,6 +4,7 @@ using sls_borders.Repositories;
 using AutoMapper;
 using sls_borders.DTO.ErrorDto;
 using sls_borders.Models;
+using sls_borders.DTO.UserDto;
 
 namespace sls_api.Controllers;
 
@@ -176,23 +177,6 @@ public class TournamentController(ITournamentRepo tournamentRepo, IMapper mapper
 
             if (!result)
                 return NotFound(new ErrorResponse { Message = $"Tournament with ID {id} not found." });
-
-            return Ok();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new ErrorResponse { Message = ex.Message });
-        }
-    }
-
-    [HttpPost("nextRound/{id:guid}")]
-    public async Task<IActionResult> AdvanceTournamentToNextRound(Guid id)
-    {
-        try
-        {
-            var result = await tournamentRepo.AdvandeToNextRoundAsync(id);
-            if (!result)
-                return NotFound(new ErrorResponse { Message = $"Tournament not found" });
 
             return Ok();
         }
