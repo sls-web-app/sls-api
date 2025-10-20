@@ -58,4 +58,15 @@ public class TournamentsHub(ITournamentRepo tournamentRepo, IGameRepo gameRepo) 
 
         await Clients.All.SendAsync("TournamentEnded", tournamentId);
     }
+
+    public async Task UndoLastTournamentRound(Guid tournamentId)
+    {
+        var success = await tournamentRepo.UndoLastRoundAsync(tournamentId);
+        if (!success)
+        {
+            throw new InvalidOperationException($"Tournament with ID {tournamentId} not found or cannot undo last round.");
+        }
+
+        await Clients.All.SendAsync("TournamentRoundUndone", tournamentId);
+    }
 }

@@ -16,5 +16,6 @@ namespace sls_borders.Repositories
         Task<bool> ActivateTournamentAsync(Guid id);
         Task<bool> DeactivateTournamentAsync(Guid id);
         Task<AdvanceToNextRoundDto?> AdvandeToNextRoundAsync(Guid id);
+        Task<bool> UndoLastRoundAsync(Guid id);
     }
 }

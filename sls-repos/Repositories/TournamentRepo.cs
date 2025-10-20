@@ -262,13 +262,34 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
                 (g.BlackPlayerId == userDto.Id && g.Score == GameScore.WhiteWin));
         }
 
-        foreach(var player in userInPlayDtos)
+        foreach (var player in userInPlayDtos)
         {
             player.FullBuchholz = BuchholzCalculator.CalculateFullBuchholzScore(userInPlayDtos, player);
             player.MedianBuchholz = BuchholzCalculator.CalculateMedianBuchholzScore(userInPlayDtos, player);
         }
 
         return userInPlayDtos;
+    }
+
+    public async Task<bool> UndoLastRoundAsync(Guid id)
+    {
+        var tournament = await context.Tournaments
+            .Include(t => t.Games)
+            .FirstOrDefaultAsync(t => t.Id == id);
+
+        if (tournament == null)
+            return false;
+
+        if (tournament.Status != TournamentStatus.Ongoing || tournament.Round == null || tournament.Round <= 1)
+            throw new InvalidOperationException("Cannot undo round for this tournament.");
+
+        var lastRoundGames = tournament.Games.Where(g => g.Round == tournament.Round).ToList();
+        context.Games.RemoveRange(lastRoundGames);
+
+        tournament.Round -= 1;
+
+        await context.SaveChangesAsync();
+        return true;
     }
 }
 
