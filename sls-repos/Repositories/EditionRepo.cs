@@ -20,6 +20,11 @@ public class EditionRepo(ApplicationDbContext context) : IEditionRepo
             .ToListAsync();
     }
 
+    public Task<Edition> GetActivatedEditionAsync()
+    {
+        return context.Editions.FirstAsync(e => e.IsActive);
+    }
+
     public async Task<Edition> CreateAsync(Edition edition)
     {
         context.Editions.Add(edition);

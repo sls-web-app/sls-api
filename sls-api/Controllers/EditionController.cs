@@ -41,6 +41,15 @@ namespace sls_api.Controllers
             return Ok(mapper.Map<List<GetEditionDto>>(editions));
         }
 
+        [HttpGet("get-activated")]
+        [ProducesResponseType<GetEditionDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<GetEditionDto>> GetActivatedEdition()
+        {
+            var edition = await editionRepo.GetActivatedEditionAsync();
+            return Ok(mapper.Map<GetEditionDto>(edition));
+        }
+
         //[Authorize(Roles = "Admin")]
         [HttpPost("create")]
         [ProducesResponseType<GetEditionDto>(StatusCodes.Status201Created)]
