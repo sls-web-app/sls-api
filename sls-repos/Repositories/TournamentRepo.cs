@@ -231,7 +231,6 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
             .Include(t => t.Edition)
             .ThenInclude(e => e.Teams)
             .ThenInclude(t => t.Users)
-            .ThenInclude(u => u.Team)
             .AsSplitQuery()
             .FirstOrDefaultAsync(t => t.Id == tournamentId);
 
@@ -248,7 +247,7 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
         foreach (var userDto in userInPlayDtos)
         {
             var userGames = await context.Games
-                .Where(g => (g.WhitePlayerId == userDto.Id || g.BlackPlayerId == userDto.Id) && g.Score != null)
+                .Where(g => (g.WhitePlayerId == userDto.Id || g.BlackPlayerId == userDto.Id) && g.Score != null && g.TournamentId == tournament.Id)
                 .ToListAsync();
 
             userDto.Wins = userGames.Count(g =>
