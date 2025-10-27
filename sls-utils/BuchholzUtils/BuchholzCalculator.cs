@@ -4,20 +4,20 @@ namespace sls_utils.BuchholzUtils;
 
 public static class BuchholzCalculator
 {
-    public static int CalculateFullBuchholzScore(List<UserInPlay> players, UserInPlay targetPlayer)
+    public static int CalculateFullBuchholzScore(List<UserInPlay> players, HashSet<Guid> opponentsIds)
     {
         int opponentsScores = 0;
-        var opponents = players.Where(p => p.Id != targetPlayer.Id).ToList();
+        var opponents = players.Where(p => opponentsIds.Contains(p.Id)).ToList();
 
         foreach (var opponent in opponents) opponentsScores += opponent.Wins * 2 + opponent.Draws;
 
         return opponentsScores;
     }
 
-    public static int CalculateMedianBuchholzScore(List<UserInPlay> players, UserInPlay targetPlayer)
+    public static int CalculateMedianBuchholzScore(List<UserInPlay> players, HashSet<Guid> opponentsIds)
     {
         var opponentsScores = new List<int>();
-        var opponents = players.Where(p => p.Id != targetPlayer.Id).ToList();
+        var opponents = players.Where(p => opponentsIds.Contains(p.Id)).ToList();
 
         foreach (var opponent in opponents)
         {

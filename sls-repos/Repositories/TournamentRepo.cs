@@ -264,8 +264,19 @@ public class TournamentRepo(ApplicationDbContext context, IMapper mapper) : ITou
 
         foreach (var player in userInPlayDtos)
         {
-            player.FullBuchholz = BuchholzCalculator.CalculateFullBuchholzScore(userInPlayDtos, player);
-            player.MedianBuchholz = BuchholzCalculator.CalculateMedianBuchholzScore(userInPlayDtos, player);
+            HashSet<Guid> opponents = new();
+            var playerGames = await context.Games
+                .Where(g => (g.WhitePlayerId == player.Id || g.BlackPlayerId == player.Id) && g.Score != null)
+                .ToListAsync();
+
+            foreach (var game in playerGames)
+            {
+                Guid opponentId = game.WhitePlayerId == player.Id ? game.BlackPlayerId : game.WhitePlayerId;
+                opponents.Add(opponentId);
+            }
+            
+            player.FullBuchholz = BuchholzCalculator.CalculateFullBuchholzScore(userInPlayDtos, opponents);
+            player.MedianBuchholz = BuchholzCalculator.CalculateMedianBuchholzScore(userInPlayDtos, opponents);
         }
 
         return userInPlayDtos;
