@@ -14,6 +14,7 @@ namespace sls_borders.Data
         public DbSet<Game> Games { get; set; } = default!;
         public DbSet<UserInvite> UserInvites { get; set; } = default!;
         public DbSet<Edition> Editions { get; set; } = default!;
+        public DbSet<Image> Images { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -148,6 +149,18 @@ namespace sls_borders.Data
                     .WithOne(u => u.Invite)
                     .HasForeignKey<UserInvite>(ui => ui.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Image>(entity =>
+            {
+                entity.HasKey(i => i.Id);
+                entity.Property(i => i.Title).IsRequired().HasMaxLength(200);
+                entity.Property(i => i.FileName).IsRequired().HasMaxLength(256);
+                entity.Property(i => i.ContentType).IsRequired();
+                entity.Property(i => i.UploadedAt).HasConversion(
+                    v => v,
+                    v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
+                );
             });
 
             base.OnModelCreating(modelBuilder);
