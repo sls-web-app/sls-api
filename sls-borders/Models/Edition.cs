@@ -16,4 +16,6 @@ public class Edition
 
     public ICollection<Team> Teams { get; set; } = [];
     public ICollection<Tournament> Tournaments { get; set; } = [];
+    public ICollection<Image> Images { get; set; } = [];
+
 }

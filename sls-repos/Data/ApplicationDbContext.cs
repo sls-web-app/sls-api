@@ -155,12 +155,24 @@ namespace sls_borders.Data
             {
                 entity.HasKey(i => i.Id);
                 entity.Property(i => i.Title).IsRequired().HasMaxLength(200);
+                entity.Property(i => i.Description).HasMaxLength(1000);
                 entity.Property(i => i.FileName).IsRequired().HasMaxLength(256);
                 entity.Property(i => i.ContentType).IsRequired();
                 entity.Property(i => i.UploadedAt).HasConversion(
                     v => v,
                     v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
                 );
+                //Many-to-one relationship with Tournament
+                entity.HasOne(i => i.Tournament)
+                    .WithMany(t => t.Images)
+                    .HasForeignKey(i => i.TournamentId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                //Many-to-one relationship with Edition
+                entity.HasOne(i => i.Edition)
+                    .WithMany(e => e.Images)
+                    .HasForeignKey(i => i.EditionId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             base.OnModelCreating(modelBuilder);

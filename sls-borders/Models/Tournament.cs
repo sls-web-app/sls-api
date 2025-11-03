@@ -20,4 +20,5 @@ public class Tournament
 
     public Edition Edition { get; set; } = null!;
     public ICollection<Game> Games { get; set; } = [];
+    public ICollection<Image> Images { get; set; } = [];
 }
