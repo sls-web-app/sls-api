@@ -4,7 +4,8 @@ namespace sls_borders.Enums;
 /// Defines the types of tournaments available.
 /// </summary>
 public enum TournamentType
-{
-    RoundRobin,
+{   
     Swiss,
+    RoundRobin,
+    
 }
