@@ -115,5 +115,111 @@ public class TeamRepo(ApplicationDbContext context, IMapper mapper, IImageServic
         await context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<GetTeamsScoreDto> GetTeamsScoreInEditionAsync(Guid editionId)
+    {
+        // fetch teams that participate in the edition
+        var teams = await context.Editions.Where(e => e.Id == editionId)
+            .SelectMany(e => e.Teams)
+            .ToListAsync();
+
+        // initialize score DTOs and dictionary for fast lookup
+        var teamsWithPoints = mapper.Map<List<GetTeamWithPointsDto>>(teams);
+        var teamsDict = teamsWithPoints.ToDictionary(t => t.Id);
+
+        // load relevant games (only for tournaments in this edition) with score
+        var games = await context.Tournaments
+            .Where(t => t.EditionId == editionId)
+            .SelectMany(t => t.Games)
+            .Where(g => g.Score != null)
+            .ToListAsync();
+
+        // SMALL POINTS: count amount of games won by the team (draws add 1, wins add 2) - keep existing weights
+        foreach (var g in games)
+        {
+            if (g.Score == GameScore.WhiteWin)
+            {
+                if (teamsDict.TryGetValue(g.WhiteTeamId, out var dto)) dto.SmallPoints += 2;
+            }
+            else if (g.Score == GameScore.BlackWin)
+            {
+                if (teamsDict.TryGetValue(g.BlackTeamId, out var dto)) dto.SmallPoints += 2;
+            }
+            else if (g.Score == GameScore.Draw)
+            {
+                if (teamsDict.TryGetValue(g.WhiteTeamId, out var dtoW)) dtoW.SmallPoints += 1;
+                if (teamsDict.TryGetValue(g.BlackTeamId, out var dtoB)) dtoB.SmallPoints += 1;
+            }
+        }
+
+        // BIG POINTS: for each tournament, compute standings based on amount of games won in that tournament
+        var tournamentsGroups = games.GroupBy(g => g.TournamentId);
+
+        foreach (var tg in tournamentsGroups)
+        {
+            // teams participating in this tournament: include all edition teams so teams with no games are present
+            var participatingTeamIds = tg.SelectMany(g => new[] { g.WhiteTeamId, g.BlackTeamId }).Distinct().ToList();
+            foreach (var id in teams.Select(t => t.Id))
+            {
+                if (!participatingTeamIds.Contains(id))
+                    participatingTeamIds.Add(id);
+            }
+
+            // wins per team in this tournament
+            var winsPerTeam = participatingTeamIds.ToDictionary(id => id, id => 0);
+
+            foreach (var g in tg)
+            {
+                if (g.Score == GameScore.WhiteWin)
+                {
+                    winsPerTeam[g.WhiteTeamId] = winsPerTeam.GetValueOrDefault(g.WhiteTeamId) + 2;
+                }
+                else if (g.Score == GameScore.BlackWin)
+                {
+                    winsPerTeam[g.BlackTeamId] = winsPerTeam.GetValueOrDefault(g.BlackTeamId) + 2;
+                }
+                else if (g.Score == GameScore.Draw)
+                {
+                    winsPerTeam[g.WhiteTeamId] = winsPerTeam.GetValueOrDefault(g.WhiteTeamId) + 1;
+                    winsPerTeam[g.BlackTeamId] = winsPerTeam.GetValueOrDefault(g.BlackTeamId) + 1;
+                }
+            }
+
+            // order teams by wins desc
+            var ordered = winsPerTeam.OrderByDescending(kv => kv.Value).ToList();
+            int teamsCount = ordered.Count;
+
+            int index = 0;
+            int? prevWins = null;
+            int prevPoints = 0;
+
+            foreach (var kv in ordered)
+            {
+                int wins = kv.Value;
+                int pointsForPosition;
+
+                if (prevWins.HasValue && wins == prevWins.Value)
+                {
+                    // same points as previous (tie)
+                    pointsForPosition = prevPoints;
+                }
+                else
+                {
+                    // higher wins -> higher points: first gets teamsCount, second gets teamsCount-1, etc.
+                    pointsForPosition = teamsCount - index;
+                    prevPoints = pointsForPosition;
+                    prevWins = wins;
+                }
+
+                if (teamsDict.TryGetValue(kv.Key, out var dto)) dto.BigPoints += pointsForPosition;
+                index++;
+            }
+        }
+
+        return new GetTeamsScoreDto
+        {
+            Teams = teamsWithPoints
+        };
+    }
 }
 
