@@ -13,5 +13,6 @@ namespace sls_borders.Repositories
         Task<Team?> UpdateAsync(Guid id, UpdateTeamDto updateTeamDto, IFormFile? avatar);
         Task<bool> DeleteAsync(Guid id);
         Task<bool> JoinEditonAsync(Guid teamId, Guid editionId);
+        Task<GetTeamsScoreDto> GetTeamsScoreInEditionAsync(Guid editionId);
     }
 }
