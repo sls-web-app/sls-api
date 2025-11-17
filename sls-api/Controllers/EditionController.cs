@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using sls_borders.DTO.EditionDto;
 using sls_borders.DTO.ErrorDto;
+using sls_borders.DTO.TeamDto;
 using sls_borders.Models;
 using sls_borders.Repositories;
 
@@ -9,7 +10,7 @@ namespace sls_api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EditionController(IEditionRepo editionRepo, IMapper mapper) : ControllerBase
+    public class EditionController(ITeamRepo teamRepo, IEditionRepo editionRepo, IMapper mapper) : ControllerBase
     {
         //[Authorize(Roles = "Admin")]
         [HttpGet("get-all")]
@@ -71,6 +72,13 @@ namespace sls_api.Controllers
             {
                 return Conflict(new ErrorResponse { Message = ex.Message });
             }
+        }
+
+        [HttpGet("getTeamsScoreInEdition/{editionId}")]
+        public async Task<ActionResult<GetTeamsScoreDto>> GetTeamsScoreInEditionAsync(Guid editionId)
+        {
+            var teamsScore = await teamRepo.GetTeamsScoreInEditionAsync(editionId);
+            return Ok(teamsScore);
         }
     }
 }
