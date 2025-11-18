@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using sls_borders.Data;
 using sls_borders.DTO.ImageDto;
@@ -9,7 +10,7 @@ namespace sls_repos.Repositories;
 /// <summary>
 /// Repository for managing Image metadata in the database
 /// </summary>
-public class ImageRepo(ApplicationDbContext context) : IImageRepo
+public class ImageRepo(ApplicationDbContext context, IMapper mapper) : IImageRepo
 {
     public async Task<List<Image>> GetAllAsync()
     {
@@ -29,16 +30,11 @@ public class ImageRepo(ApplicationDbContext context) : IImageRepo
 
     public async Task<Image> CreateAsync(CreateImageDto createImageDto)
     {
-    var image = new Image
-        {
-      Id = Guid.NewGuid(),
-            Title = createImageDto.Title,
-       FileName = createImageDto.FileName,
-            ContentType = createImageDto.ContentType,
-        UploadedAt = DateTime.UtcNow
-      };
+        var image = mapper.Map<Image>(createImageDto);
+        image.Id = Guid.NewGuid();
+        image.UploadedAt = DateTime.UtcNow;
 
-     context.Images.Add(image);
+        context.Images.Add(image);
         await context.SaveChangesAsync();
 
         return image;
@@ -48,22 +44,20 @@ public class ImageRepo(ApplicationDbContext context) : IImageRepo
     {
         var existingImage = await context.Images.FindAsync(id);
  
-      if (existingImage == null)
+        if (existingImage == null)
             return null;
 
-   existingImage.Title = updateImageDto.Title;
-        existingImage.FileName = updateImageDto.FileName;
-        existingImage.ContentType = updateImageDto.ContentType;
+        mapper.Map(updateImageDto, existingImage);
 
         await context.SaveChangesAsync();
-    return existingImage;
+        return existingImage;
     }
 
     public async Task<bool> DeleteAsync(Guid id)
     {
         var image = await context.Images.FindAsync(id);
         
-    if (image == null)
+        if (image == null)
             return false;
 
         context.Images.Remove(image);

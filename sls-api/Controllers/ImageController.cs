@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using sls_borders.DTO.ImageDto;
@@ -12,18 +13,19 @@ namespace sls_api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class ImageController(IImageService imageService, IImageRepo imageRepo) : ControllerBase
+public class ImageController(IImageService imageService, IImageRepo imageRepo, IMapper mapper) : ControllerBase
 {
     /// <summary>
     /// Uploads an image file
     /// </summary>
     /// <param name="file">The image file to upload</param>
-    /// <param name="category">The category of the image (avatar or image)</param>
-    /// <param name="title">Optional title for the image (only used when category is Image)</param>
+    /// <param name="uploadRequest">Upload request containing image metadata</param>
     /// <returns>Upload result with file information</returns>
     [HttpPost("upload")]
     [Consumes("multipart/form-data")]
-    public async Task<ActionResult<ImageUploadResultDto>> UploadImage(IFormFile file, [FromForm] ImageCategory category, [FromForm] string? title = null)
+    public async Task<ActionResult<ImageUploadResultDto>> UploadImage(
+        IFormFile file,
+        [FromForm] UploadImageRequestDto uploadRequest)
     {
         if (file == null || file.Length == 0)
         {
@@ -35,18 +37,32 @@ public class ImageController(IImageService imageService, IImageRepo imageRepo) :
         }
 
         using var stream = file.OpenReadStream();
-        var result = await imageService.UploadImageAsync(stream, file.FileName, file.ContentType, category);
+        var result = await imageService.UploadImageAsync(stream, file.FileName, file.ContentType, uploadRequest.Category);
 
         if (result.Success)
         {
             // If category is Image, also save metadata to database
-            if (category == ImageCategory.Image)
+            if (uploadRequest.Category == ImageCategory.Image)
             {
+                if (uploadRequest.EditionId == Guid.Empty || uploadRequest.TournamentId == Guid.Empty)
+                {
+                    return BadRequest(new ImageUploadResultDto
+                    {
+                        Success = false,
+                        ErrorMessage = "EditionId and TournamentId are required for Image category"
+                    });
+                }
+
                 var createImageDto = new CreateImageDto
                 {
-                    Title = title ?? Path.GetFileNameWithoutExtension(file.FileName),
+                    Title = string.IsNullOrWhiteSpace(uploadRequest.Title) 
+                        ? Path.GetFileNameWithoutExtension(file.FileName) 
+                        : uploadRequest.Title,
+                    Description = uploadRequest.Description,
                     FileName = result.FileName,
-                    ContentType = file.ContentType
+                    ContentType = file.ContentType,
+                    EditionId = uploadRequest.EditionId,
+                    TournamentId = uploadRequest.TournamentId
                 };
 
                 await imageRepo.CreateAsync(createImageDto);
@@ -65,7 +81,6 @@ public class ImageController(IImageService imageService, IImageRepo imageRepo) :
     /// <param name="category">The category of the image</param>
     /// <returns>Success status</returns>
     [HttpDelete("{category}/{fileName}")]
-    [Authorize]
     public async Task<ActionResult<bool>> DeleteImageAsync(string fileName, ImageCategory category)
     {
         var result = await imageService.DeleteImageAsync(fileName, category);
@@ -129,19 +144,11 @@ public class ImageController(IImageService imageService, IImageRepo imageRepo) :
     /// Gets all image metadata records
     /// </summary>
     /// <returns>List of all image metadata</returns>
-    [HttpGet("metadata")]
+    [HttpGet("metadata/get-all")]
     public async Task<ActionResult<List<GetImageDto>>> GetAllImageMetadata()
     {
         var images = await imageRepo.GetAllAsync();
-        var imageDtos = images.Select(i => new GetImageDto
-        {
-            Id = i.Id,
-            Title = i.Title,
-            FileName = i.FileName,
-            ContentType = i.ContentType,
-            UploadedAt = i.UploadedAt
-        }).ToList();
-
+        var imageDtos = mapper.Map<List<GetImageDto>>(images);
         return Ok(imageDtos);
     }
 
@@ -160,15 +167,7 @@ public class ImageController(IImageService imageService, IImageRepo imageRepo) :
             return NotFound(new { message = "Image metadata not found" });
         }
 
-        var imageDto = new GetImageDto
-        {
-            Id = image.Id,
-            Title = image.Title,
-            FileName = image.FileName,
-            ContentType = image.ContentType,
-            UploadedAt = image.UploadedAt
-        };
-
+        var imageDto = mapper.Map<GetImageDto>(image);
         return Ok(imageDto);
     }
 
@@ -187,15 +186,7 @@ public class ImageController(IImageService imageService, IImageRepo imageRepo) :
             return NotFound(new { message = "Image metadata not found" });
         }
 
-        var imageDto = new GetImageDto
-        {
-            Id = image.Id,
-            Title = image.Title,
-            FileName = image.FileName,
-            ContentType = image.ContentType,
-            UploadedAt = image.UploadedAt
-        };
-
+        var imageDto = mapper.Map<GetImageDto>(image);
         return Ok(imageDto);
     }
 
@@ -206,7 +197,6 @@ public class ImageController(IImageService imageService, IImageRepo imageRepo) :
     /// <param name="updateImageDto">Updated image metadata</param>
     /// <returns>Updated image metadata</returns>
     [HttpPut("metadata/{id}")]
-    [Authorize]
     public async Task<ActionResult<GetImageDto>> UpdateImageMetadata(Guid id, [FromBody] CreateImageDto updateImageDto)
     {
         var image = await imageRepo.UpdateAsync(id, updateImageDto);
@@ -216,15 +206,7 @@ public class ImageController(IImageService imageService, IImageRepo imageRepo) :
             return NotFound(new { message = "Image metadata not found" });
         }
 
-        var imageDto = new GetImageDto
-        {
-            Id = image.Id,
-            Title = image.Title,
-            FileName = image.FileName,
-            ContentType = image.ContentType,
-            UploadedAt = image.UploadedAt
-        };
-
+        var imageDto = mapper.Map<GetImageDto>(image);
         return Ok(imageDto);
     }
 

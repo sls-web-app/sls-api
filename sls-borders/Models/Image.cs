@@ -13,7 +13,7 @@ namespace sls_borders.Models
     {
         public Guid Id { get; set; }
         public string Title { get; set; } = null!;
-        public string Description { get; set; } = null!;
+        public string? Description { get; set; } = null!;
         public int Status { get; set; }
         public string FileName { get; set; } = null!;
         public string ContentType { get; set; } = null!;

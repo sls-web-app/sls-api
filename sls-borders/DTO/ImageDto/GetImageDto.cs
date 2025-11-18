@@ -10,8 +10,11 @@ namespace sls_borders.DTO.ImageDto
     {
         public Guid Id { get; set; }
         public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public string FileName { get; set; } = string.Empty;
         public string ContentType { get; set; } = string.Empty;
         public DateTime UploadedAt { get; set; }
+        public Guid EditionId { get; set; }
+        public Guid TournamentId { get; set; }
     }
 }
